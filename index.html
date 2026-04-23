@@ -39,10 +39,10 @@ button,input{font-family:'DM Mono',monospace}
 #setup{height:calc(var(--vh, 1vh) * 100);overflow-y:scroll;-webkit-overflow-scrolling:touch;}
 .screen.active{display:flex}
 
-#setup{align-items:center;justify-content:flex-start;padding:0.75rem 1rem 1.5rem;gap:0.75rem;overflow-y:scroll;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#setup{align-items:center;justify-content:flex-start;padding:0.75rem 1rem 1.5rem;gap:0.75rem;overflow-y:scroll;-webkit-overflow-scrolling:touch;overscroll-behofior:contain}
 .brand-title{font-family:'DM Serif Display',serif;font-size:38px;color:var(--gold);text-align:center}
 .brand-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-top:4px}
-.hero-medal{width:110px;display:block;margin:4px auto;border-radius:0;object-fit:contain}
+.hero-medal{width:110px;height:110px;display:block;margin:4px auto;border-radius:0;object-fit:contain;background:transparent}
 .champion-medal{width:240px;margin:8px auto 4px}
 
 .setup-card{background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem;width:100%;max-width:340px}
@@ -99,7 +99,7 @@ button,input{font-family:'DM Mono',monospace}
 .score-box-pts{font-size:24px;font-weight:500;color:var(--text)}
 .score-box-pts.pos{color:var(--green)}
 .divider-line{height:0.5px;background:var(--border);margin:14px 16px 0}
-.choice-area{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.choice-area{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;overscroll-behofior:contain}
 .choice-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
 .choices{display:flex;flex-direction:column;gap:10px}
 .choice-item{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -147,7 +147,7 @@ button,input{font-family:'DM Mono',monospace}
 .hi-pts{font-size:14px;font-weight:500}
 .pos{color:var(--green)}
 
-#finish,#tournament{align-items:center;justify-content:center;padding:2rem;gap:1.25rem;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#finish,#tournament{align-items:center;justify-content:center;padding:2rem;gap:1.25rem;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behofior:contain}
 .finish-title{font-family:'DM Serif Display',serif;font-size:40px;color:var(--gold);text-align:center}
 .finish-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-top:4px}
 .finish-scores,.summary-list,.round-list{width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px}
@@ -167,7 +167,7 @@ button,input{font-family:'DM Mono',monospace}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Rules screen */
-#rules{align-items:center;padding:2rem 1.5rem;gap:1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#rules{align-items:center;padding:2rem 1.5rem;gap:1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behofior:contain}
 .rules-screen-title{font-family:'DM Serif Display',serif;font-size:36px;color:var(--gold);text-align:center}
 .rules-screen-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-top:2px}
 .rules-section{width:100%;max-width:340px;background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem}
@@ -199,71 +199,71 @@ button,input{font-family:'DM Mono',monospace}
   <!-- ACTIVE TOURNAMENT MODE -->
   <div id="setup-active" style="display:none;flex-direction:column;align-items:center;gap:1.25rem;width:100%">
     <div class="setup-card" style="width:100%;max-width:340px">
-      <div class="setup-label">Aktiv turnering</div>
+      <div class="setup-label">Active tournament</div>
       <div id="active-players-display" style="font-size:16px;color:var(--text);margin-bottom:8px"></div>
       <div id="active-rounds-display" style="font-size:12px;color:var(--muted)"></div>
     </div>
     <div class="rules-box" id="rules-box-active"></div>
-    <button class="btn-primary" onclick="resumeCurrentOrSetup()">Fortsett turnering</button>
-    <button class="btn-secondary" onclick="showTournament()">Se sammendrag</button>
+    <button class="btn-primary" onclick="resumeCurrentOrSetup()">Continue tournament</button>
+    <button class="btn-secondary" onclick="showTournament()">View summary</button>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Regler</button>
-    <button class="btn-danger" onclick="confirmNewTournament()">Avslutt og start ny turnering</button>
-    <div class="helper-text">Poeng er lagret og trygt. Trykk «Fortsett» for å spille videre.</div>
+    <button class="btn-danger" onclick="confirmNewTournament()">End and start new tournament</button>
+    <div class="helper-text">Scores are sofed. Tap «Continue» to keep playing.</div>
   </div>
 
   <!-- NEW TOURNAMENT MODE -->
   <div id="setup-new" style="display:flex;flex-direction:column;align-items:center;gap:1.25rem;width:100%">
     <div class="setup-card" style="width:100%;max-width:340px">
-      <div class="setup-label">Antall spillere</div>
+      <div class="setup-label">Number of players</div>
       <div class="toggle-row">
-        <div class="count-btn active" id="btn3" onclick="setPlayerCount(3)">3 spillere</div>
-        <div class="count-btn" id="btn4" onclick="setPlayerCount(4)">4 spillere</div>
+        <div class="count-btn active" id="btn3" onclick="setPlayerCount(3)">3 players</div>
+        <div class="count-btn" id="btn4" onclick="setPlayerCount(4)">4 players</div>
       </div>
     </div>
     <div class="setup-card" style="width:100%;max-width:340px">
-      <div class="setup-label">Antall runder i turneringen</div>
+      <div class="setup-label">Number of rounds</div>
       <div class="round-count-row">
         <div class="round-count-btn" onclick="changeMaxRounds(-1)">−</div>
         <div>
           <div class="round-count-val" id="maxRoundsDisplay">1</div>
-          <div class="round-count-unit">runde(r)</div>
+          <div class="round-count-unit">round(s)</div>
         </div>
         <div class="round-count-btn" onclick="changeMaxRounds(1)">+</div>
       </div>
     </div>
     <div class="setup-card" style="width:100%;max-width:340px">
-      <div class="setup-label">Spillerrekkefølge hull 1</div>
-      <div class="player-input"><div class="player-num">1</div><input id="p1" type="text" placeholder="Spiller 1" maxlength="12" /></div>
-      <div class="player-input"><div class="player-num">2</div><input id="p2" type="text" placeholder="Spiller 2" maxlength="12" /></div>
-      <div class="player-input"><div class="player-num">3</div><input id="p3" type="text" placeholder="Spiller 3" maxlength="12" /></div>
+      <div class="setup-label">Player order hole 1</div>
+      <div class="player-input"><div class="player-num">1</div><input id="p1" type="text" placeholder="Player 1" maxlength="12" /></div>
+      <div class="player-input"><div class="player-num">2</div><input id="p2" type="text" placeholder="Player 2" maxlength="12" /></div>
+      <div class="player-input"><div class="player-num">3</div><input id="p3" type="text" placeholder="Player 3" maxlength="12" /></div>
       <div class="player-input p4-row hidden-player" id="p4-row">
-        <div class="player-num">4</div><input id="p4" type="text" placeholder="Spiller 4" maxlength="12" />
+        <div class="player-num">4</div><input id="p4" type="text" placeholder="Player 4" maxlength="12" />
       </div>
     </div>
     <div class="rules-box" id="rules-box"></div>
-    <button class="btn-primary" onclick="startGame()">Start turnering</button>
+    <button class="btn-primary" onclick="startGame()">Start tournament</button>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Regler</button>
-    <div class="helper-text">Poeng lagres automatisk mellom runder og dager.</div>
+    <div class="helper-text">Scores are sofed automatically between rounds and days.</div>
   </div>
 </div>
 
 <div id="game" class="screen">
   <div class="top-bar">
     <div>
-      <div class="hole-tag">Hull</div>
+      <div class="hole-tag">Hole</div>
       <div class="hole-num" id="g-hole">1</div>
     </div>
     <div class="ctrl-block">
-      <div class="ctrl-tag">Styrer</div>
+      <div class="ctrl-tag">Wolf</div>
       <div class="ctrl-name" id="g-ctrl"></div>
     </div>
   </div>
 
   <div class="top-actions">
-    <div class="top-chip" onclick="showTournament()">Turnering <strong id="chipRoundText">1 / 1</strong></div>
-    <div class="top-chip" onclick="undoHole()">Angre hull</div>
-    <div class="top-chip" onclick="goSetup()">Ny / annen runde</div>
-    <div class="top-chip" onclick="shareLiveGraphic()">Del live</div>
+    <div class="top-chip" onclick="showTournament()">Tournament <strong id="chipRoundText">1 / 1</strong></div>
+    <div class="top-chip" onclick="undoHole()">Undo hole</div>
+    <div class="top-chip" onclick="goSetup()">New / other round</div>
+    <div class="top-chip" onclick="shareLiveGraphic()">Share live</div>
   </div>
 
   <div class="scores-row players-3" id="g-scores"></div>
@@ -271,38 +271,38 @@ button,input{font-family:'DM Mono',monospace}
   <div class="choice-area" id="choice-area"></div>
 
   <div class="hist-area" id="hist-area" style="display:none">
-    <span class="hist-toggle" onclick="toggleHist()">Logg (<span id="hist-count">0</span> hull) ▾</span>
+    <span class="hist-toggle" onclick="toggleHist()">Log (<span id="hist-count">0</span> holes) ▾</span>
     <div class="hist-list hidden" id="hist-list"></div>
   </div>
 </div>
 
 <div id="finish" class="screen">
   <div>
-    <div class="finish-title">Runde ferdig</div>
+    <div class="finish-title">Round complete</div>
     <div class="finish-sub">Wolf Score</div>
   </div>
   <div class="finish-scores" id="finish-scores"></div>
-  <button class="btn-primary" onclick="showTournament()">Se samlet stilling</button>
-  <button class="btn-secondary" onclick="shareWhatsAppSummary()">Del resultat på WhatsApp</button>
-  <button class="btn-secondary" onclick="shareTournamentGraphic()">Del grafisk sammendrag</button>
-  <button class="btn-secondary" onclick="prepareNextRound()">Start neste runde</button>
-  <button class="btn-ghost" onclick="goSetup()">Til oppsett</button>
+  <button class="btn-primary" onclick="showTournament()">View standings</button>
+  <button class="btn-secondary" onclick="shareWhatsAppSummary()">Share on WhatsApp</button>
+  <button class="btn-secondary" onclick="shareTournamentGraphic()">Share graphic</button>
+  <button class="btn-secondary" onclick="prepareNextRound()">Start next round</button>
+  <button class="btn-ghost" onclick="goSetup()">Back to setup</button>
 </div>
 
 <div id="tournament" class="screen">
   <div>
-    <div class="finish-title">Turnering</div>
-    <div class="finish-sub" id="t-finish-sub">Samlet score</div>
+    <div class="finish-title">Tournament</div>
+    <div class="finish-sub" id="t-finish-sub">Total score</div>
   </div>
   <div class="summary-card highlight" id="t-summary-card"></div>
   <div class="section-title">Sammenlagt</div>
   <div class="summary-list" id="t-summary-list"></div>
-  <div class="section-title">Historiske runder</div>
+  <div class="section-title">Historiske rounds</div>
   <div class="round-list" id="t-round-list"></div>
-  <button class="btn-primary" onclick="resumeCurrentOrSetup()">Tilbake til appen</button>
-  <button class="btn-secondary" onclick="shareWhatsAppSummary()">Del sammendrag på WhatsApp</button>
-  <button class="btn-secondary" onclick="shareTournamentGraphic()">Del grafisk sammendrag</button>
-  <button class="btn-ghost" onclick="goSetup()">Ny runde / oppsett</button>
+  <button class="btn-primary" onclick="resumeCurrentOrSetup()">Back to app</button>
+  <button class="btn-secondary" onclick="shareWhatsAppSummary()">Share summary on WhatsApp</button>
+  <button class="btn-secondary" onclick="shareTournamentGraphic()">Share graphic</button>
+  <button class="btn-ghost" onclick="goSetup()">Ny round / oppsett</button>
 </div>
 
 <div id="champion" class="screen">
@@ -312,9 +312,9 @@ button,input{font-family:'DM Mono',monospace}
   </div>
   <img src="wolf-winner.png" class="hero-medal champion-medal" alt="Wolf Winner" />
   <div class="finish-scores" id="champion-card"></div>
-  <button class="btn-primary" onclick="shareChampionGraphic()">Del champion-bilde</button>
-  <button class="btn-secondary" onclick="showTournament()">Se turneringssammendrag</button>
-  <button class="btn-ghost" onclick="goSetup()">Til oppsett</button>
+  <button class="btn-primary" onclick="shareChampionGraphic()">Share champion image</button>
+  <button class="btn-secondary" onclick="showTournament()">View tournament summary</button>
+  <button class="btn-ghost" onclick="goSetup()">Back to setup</button>
 </div>
 
 <div id="rules" class="screen">
@@ -324,53 +324,53 @@ button,input{font-family:'DM Mono',monospace}
   </div>
 
   <div class="rules-section">
-    <div class="rules-section-title">Før start</div>
+    <div class="rules-section-title">Before you start</div>
     <div class="rules-text">
-      Rekkefølgen <strong>trekkes tilfeldig</strong> før første hull og er fast gjennom hele runden.<br><br>
-      Den som er <strong>først i rekkefølgen er styrer</strong> på hull 1, deretter rullerer det hull for hull.<br><br>
-      Styreren slår ut <strong>først</strong> på hvert hull. Den med flest poeng etter 18 hull vinner. Ved delt hull deles <strong>ingen poeng</strong> ut.<br><br>
-      <strong>4 spillere — hull 17 og 18:</strong> Spilleren med <strong>færrest poeng</strong> er styrer på hull 17. Spilleren med færrest poeng etter hull 17 er styrer på hull 18.
+      The order <strong>is drawn randomly</strong> før firste holes og er fast gjennom hele roundn.<br><br>
+      The player who is <strong>first in the order is the Wolf</strong> på holes 1, deretter rullerer det holes for holes.<br><br>
+      Wolfen slår ut <strong>first</strong> på hvert holes. Den med flest points etter 18 holes wins. Ved delt holes deles <strong>no points</strong> are awarded.<br><br>
+      <strong>4 players — holes 17 og 18:</strong> The player with <strong>fewest points</strong> er styrer på holes 17. The player with fewest points etter holes 17 er styrer på holes 18.
     </div>
   </div>
 
   <div class="rules-section">
-    <div class="rules-section-title">Slik velger styreren</div>
+    <div class="rules-section-title">How the Wolf chooses</div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🔴</div>
-      <div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Erklæres <strong>før</strong> styreren selv slår. Går solo mot alle.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>før</strong> styreren selv slår. Går solo vs alle.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟡</div>
-      <div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Erklæres <strong>etter</strong> eget utslag, men før de andre slår. Går solo mot alle.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Declared <strong>etter</strong> eget utslag, men før de andre slår. Går solo vs alle.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">⚪</div>
-      <div class="rules-type-body"><div class="rules-type-name">Wolf</div><div class="rules-type-desc">Styreren har ikke valgt partner innen alle andre har slått — går automatisk solo.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Wolf</div><div class="rules-type-desc">Wolfen har ikke valgt partner innen alle andre har slått — går automatisk solo.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟢</div>
-      <div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Styreren velger en medspiller <strong>umiddelbart etter at vedkommende har slått</strong>. Man kan ikke vente og se de andre slå først!</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Wolfen velger en medspiller <strong>immediately after they hit</strong>. You cannot wait to see others hit first!</div></div>
     </div>
   </div>
 
   <div class="rules-section">
-    <div class="rules-section-title">Poeng</div>
+    <div class="rules-section-title">Scoring</div>
     <div class="rules-pts-grid">
-      <div class="rules-pts-section-label">3 spillere</div>
-      <div class="rules-pts-label">Blind Wolf vinner</div><div class="rules-pts-val">+4p</div>
-      <div class="rules-pts-label">Lone Wolf vinner</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Wolf vinner</div><div class="rules-pts-val">+2p</div>
-      <div class="rules-pts-label">Motstandere vinner</div><div class="rules-pts-val">+1p hver</div>
-      <div class="rules-pts-label">Partner vinner</div><div class="rules-pts-val">+1p hver</div>
-      <div class="rules-pts-label">Delt hull</div><div class="rules-pts-val">0p</div>
+      <div class="rules-pts-section-label">3 players</div>
+      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
+      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
+      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
+      <div class="rules-pts-label">Vsstandere wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Partner play wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
       <div class="rules-pts-divider"></div>
-      <div class="rules-pts-section-label">4 spillere</div>
-      <div class="rules-pts-label">Blind Wolf vinner</div><div class="rules-pts-val">+5p</div>
-      <div class="rules-pts-label">Lone Wolf vinner</div><div class="rules-pts-val">+4p</div>
-      <div class="rules-pts-label">Wolf vinner</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Motstandere vinner</div><div class="rules-pts-val">+1p hver</div>
-      <div class="rules-pts-label">Partner (2v2) vinner</div><div class="rules-pts-val">+1p hver</div>
-      <div class="rules-pts-label">Delt hull</div><div class="rules-pts-val">0p</div>
+      <div class="rules-pts-section-label">4 players</div>
+      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
+      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
+      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
+      <div class="rules-pts-label">Vsstandere wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Partner 2v2 wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
     </div>
   </div>
 
@@ -444,12 +444,12 @@ function changeMaxRounds(delta){
 function renderRulesBox(){
   const n = setupNumPlayers;
   document.getElementById('rules-box').innerHTML = `
-    <div class="rules-title">Poengforklaring — ${n} spillere</div>
-    <div class="rules-row"><span>Blind Wolf vinner</span><span>+${n===4?5:4}p</span></div>
-    <div class="rules-row"><span>Lone Wolf vinner</span><span>+${n===4?4:3}p</span></div>
-    <div class="rules-row"><span>Wolf vinner</span><span>+${n===4?3:2}p</span></div>
-    <div class="rules-row"><span>Motstandere vinner vs solo</span><span>+1p hver</span></div>
-    <div class="rules-row"><span>${n===4?'2v2 lagspill':'Lagspill'} — vinnerlaget</span><span>+1p hver</span></div>`;
+    <div class="rules-title">Scoring — ${n} players</div>
+    <div class="rules-row"><span>Blind Wolf wins</span><span>+${n===4?5:4}p</span></div>
+    <div class="rules-row"><span>Lone Wolf wins</span><span>+${n===4?4:3}p</span></div>
+    <div class="rules-row"><span>Wolf wins</span><span>+${n===4?3:2}p</span></div>
+    <div class="rules-row"><span>Opponents win vs solo</span><span>+1p each</span></div>
+    <div class="rules-row"><span>${n===4?'2v2 lagspill':'Partner play'} — winslaget</span><span>+1p each</span></div>`;
 }
 
 /* ── Toast ── */
@@ -464,7 +464,7 @@ function showToast(msg, duration=2500){
 /* ── Persistence ── */
 function defaultTournament(){ return { players:[], numPlayers:3, maxRounds:1, rounds:[], currentGame:null }; }
 
-function saveTournament(){
+function sofeTournament(){
   tournament.currentGame = isGameInProgress() ? snapshotCurrentGame() : null;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
   updateResetButton();
@@ -523,7 +523,7 @@ function updateResetButton(){
     const names = tournament.players.length ? tournament.players : [];
     document.getElementById('active-players-display').textContent = names.join(' · ') || '';
     document.getElementById('active-rounds-display').textContent =
-      `${completed} av ${mr} runder fullført · ${np} spillere`;
+      `${completed} of ${mr} rounds completed · ${np} players`;
     // Update rules box in active mode
     const n = np;
     const blind = n === 4 ? 5 : 4;
@@ -531,12 +531,12 @@ function updateResetButton(){
     const wolf  = n === 4 ? 3 : 2;
     const rb = document.getElementById('rules-box-active');
     if(rb) rb.innerHTML = `
-      <div class="rules-title">Poengforklaring — ${n} spillere</div>
-      <div class="rules-row"><span>Blind Wolf vinner</span><span>+${blind}p</span></div>
-      <div class="rules-row"><span>Lone Wolf vinner</span><span>+${lone}p</span></div>
-      <div class="rules-row"><span>Wolf vinner</span><span>+${wolf}p</span></div>
-      <div class="rules-row"><span>Motstandere vinner vs solo</span><span>+1p hver</span></div>
-      <div class="rules-row"><span>${n===4?'2v2 lagspill':'Lagspill'} — vinnerlaget</span><span>+1p hver</span></div>`;
+      <div class="rules-title">Scoring — ${n} players</div>
+      <div class="rules-row"><span>Blind Wolf wins</span><span>+${blind}p</span></div>
+      <div class="rules-row"><span>Lone Wolf wins</span><span>+${lone}p</span></div>
+      <div class="rules-row"><span>Wolf wins</span><span>+${wolf}p</span></div>
+      <div class="rules-row"><span>Opponents win vs solo</span><span>+1p each</span></div>
+      <div class="rules-row"><span>${n===4?'2v2 lagspill':'Partner play'} — winslaget</span><span>+1p each</span></div>`;
   } else {
     activeDiv.style.display = 'none';
     newDiv.style.display = 'flex';
@@ -544,7 +544,7 @@ function updateResetButton(){
 }
 
 function confirmNewTournament(){
-  if(!confirm('Er du sikker? All lagret score fra denne turneringen slettes permanent.')) return;
+  if(!confirm('Are you sure? All saved scores will be permanently deleted.')) return;
   resetTournament();
 }
 
@@ -609,7 +609,7 @@ function startGame(){
     const existingKey = tournament.players.join('|');
     const newKey      = inputNames.join('|');
     if(existingKey !== newKey || tournament.numPlayers !== setupNumPlayers){
-      if(!confirm('Du har en eksisterende turnering med andre spillere. Vil du starte en ny turnering?')) return;
+      if(!confirm('Du har en eksisterende turnering med andre players. Vil du starte en ny turnering?')) return;
       tournament = defaultTournament();
     }
   }
@@ -629,7 +629,7 @@ function startGame(){
   tournament.players    = [...players];
   tournament.numPlayers = numPlayers;
   tournament.maxRounds  = maxRounds;
-  saveTournament();
+  sofeTournament();
   showScreen('game');
   if(typeof gtag !== 'undefined') gtag('event', 'start_round', {round_number: currentRound, num_players: numPlayers});
   render();
@@ -670,11 +670,11 @@ function renderChoices(){
   if(!hChoice){
     const partnerChoices = others.map(i => {
       const remaining = others.filter(j => j !== i).map(j => players[j]).join(' & ');
-      const vsLabel = numPlayers === 4 ? `2v2 · mot ${remaining}` : `mot ${remaining}`;
+      const vsLabel = numPlayers === 4 ? `2v2 · vs ${remaining}` : `vs ${remaining}`;
       return `
         <div class="choice-item c-green" onclick="pick('partner:${i}')">
           <div>
-            <div class="ci-title">Partner med ${players[i]}</div>
+            <div class="ci-title">Partner with ${players[i]}</div>
             <div class="ci-sub">${vsLabel}</div>
           </div>
           <div class="ci-pts green">1p</div>
@@ -682,20 +682,20 @@ function renderChoices(){
     }).join('');
 
     const specialHole = numPlayers === 4 && hole >= 17;
-    const specialNote = specialHole ? ' 🏴 (færrest poeng)' : '';
+    const specialNote = specialHole ? ' 🏴 (fewest points)' : '';
     area.innerHTML = `
-      <div class="choice-label">${roundName} · Styrer: ${cn()}${specialNote} — velg type hull</div>
+      <div class="choice-label">${roundName} · Wolf: ${cn()}${specialNote} — velg type holes</div>
       <div class="choices">
         <div class="choice-item c-gold" onclick="pick('blind')">
-          <div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} er Wolf — meldt før utslag</div></div>
+          <div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} is Wolf — declared before tee shot</div></div>
           <div class="ci-pts gold">${numPlayers===4?5:4}p</div>
         </div>
         <div class="choice-item c-gold" onclick="pick('lone')">
-          <div><div class="ci-title">Lone Wolf</div><div class="ci-sub">${cn()} er Wolf — etter eget utslag</div></div>
+          <div><div class="ci-title">Lone Wolf</div><div class="ci-sub">${cn()} is Wolf — after own tee shot</div></div>
           <div class="ci-pts gold">${numPlayers===4?4:3}p</div>
         </div>
         <div class="choice-item c-red" onclick="pick('wolf')">
-          <div><div class="ci-title">Wolf</div><div class="ci-sub">${cn()} er Wolf — etter alle utslag</div></div>
+          <div><div class="ci-title">Wolf</div><div class="ci-sub">${cn()} is Wolf — after all tee shots</div></div>
           <div class="ci-pts gold">${numPlayers===4?3:2}p</div>
         </div>
         ${partnerChoices}
@@ -706,38 +706,38 @@ function renderChoices(){
   const info = holeInfo();
   const wolfLabel  = info.isSolo ? info.wolfName      : info.wolfSideNames;
   const otherLabel = info.isSolo ? info.vsNames        : info.vsSideNames;
-  const wolfPtsLbl = info.isSolo ? `+${info.pts}p`    : '+1p hver';
+  const wolfPtsLbl = info.isSolo ? `+${info.pts}p`    : '+1p each';
 
   area.innerHTML = `
-    <span class="back-link" onclick="hChoice=null;hResult=null;saveTournament();render()">← Endre valg</span>
+    <span class="back-link" onclick="hChoice=null;hResult=null;sofeTournament();render()">← Change choice</span>
     <div class="result-info">
-      <div class="result-info-label">Oppstilling</div>
+      <div class="result-info-label">Match</div>
       <div class="teams-row">
         <span class="team-wolf">🐺 ${wolfLabel}</span>
         <span class="team-vs">vs</span>
         <span class="team-partners">${otherLabel}</span>
       </div>
     </div>
-    <div class="result-label">Hvem vinner hullet?</div>
+    <div class="result-label">Hvem wins holeset?</div>
     <div class="result-btns">
       <div class="result-btn r-wolf ${hResult==='wolf'?'selected':''}" onclick="setRes('wolf')">
-        <div><div class="rb-tag wolf-tag">🐺 Wolf-siden vinner</div><div class="rb-names">${wolfLabel}</div></div>
+        <div><div class="rb-tag wolf-tag">🐺 Wolf side wins</div><div class="rb-names">${wolfLabel}</div></div>
         <div class="rb-pts gold">${wolfPtsLbl}</div>
       </div>
       <div class="result-btn r-partners ${hResult==='others'?'selected':''}" onclick="setRes('others')">
-        <div><div class="rb-tag partners-tag">Motstanderne vinner</div><div class="rb-names">${otherLabel}</div></div>
-        <div class="rb-pts green">+1p hver</div>
+        <div><div class="rb-tag partners-tag">Opponents win</div><div class="rb-names">${otherLabel}</div></div>
+        <div class="rb-pts green">+1p each</div>
       </div>
       <div class="result-btn r-draw ${hResult==='draw'?'selected':''}" onclick="setRes('draw')">
-        <div><div class="rb-tag draw-tag">Uavgjort</div><div class="rb-names">Ingen poeng</div></div>
+        <div><div class="rb-tag draw-tag">Tied</div><div class="rb-names">No points</div></div>
         <div class="rb-pts muted">0p</div>
       </div>
     </div>
-    ${hResult ? `<button class="confirm-btn" onclick="confirmHole()">Bekreft hull ${hole}</button>` : ''}`;
+    ${hResult ? `<button class="confirm-btn" onclick="confirmHole()">Bekreft holes ${hole}</button>` : ''}`;
 }
 
-function pick(c){ hChoice = c; hResult = null; saveTournament(); render(); }
-function setRes(r){ hResult = r; saveTournament(); render(); }
+function pick(c){ hChoice = c; hResult = null; sofeTournament(); render(); }
+function setRes(r){ hResult = r; sofeTournament(); render(); }
 
 function confirmHole(){
   const info = holeInfo();
@@ -750,16 +750,16 @@ function confirmHole(){
   if(hResult === 'wolf'){
     if(info.isSolo){
       changes[info.wolfIdx] = info.pts;
-      desc = `🐺 ${wolfLabel} vinner (+${info.pts}p)`;
+      desc = `🐺 ${wolfLabel} wins (+${info.pts}p)`;
     } else {
       info.wolfSide.forEach(i => { changes[i] = 1; });
-      desc = `${wolfLabel} vinner (+1p hver)`;
+      desc = `${wolfLabel} wins (+1p each)`;
     }
   } else if(hResult === 'others'){
     info.partnerSide.forEach(i => { changes[i] = 1; });
-    desc = `${otherLabel} vinner (+1p hver)`;
+    desc = `${otherLabel} wins (+1p each)`;
   } else {
-    desc = 'Uavgjort';
+    desc = 'Tied';
   }
 
   scores = scores.map((s,i) => s + changes[i]);
@@ -768,7 +768,7 @@ function confirmHole(){
   if(hChoice === 'blind') modeLabel = 'Blind Wolf';
   else if(hChoice === 'lone') modeLabel = 'Lone Wolf';
   else if(hChoice === 'wolf') modeLabel = 'Wolf';
-  else modeLabel = `Partner m/${players[parseInt(hChoice.split(':')[1])]}`;
+  else modeLabel = `Partner w/${players[parseInt(hChoice.split(':')[1])]}`;
 
   history.push({ hole, wolfSide:[...info.wolfSide], partnerSide:[...info.partnerSide], mode:modeLabel, desc, changes:[...changes] });
 
@@ -779,10 +779,10 @@ function confirmHole(){
   document.getElementById('hist-area').style.display = 'block';
   document.getElementById('hist-count').textContent = history.length;
   renderHistList();
-  if(navigator.vibrate) navigator.vibrate(25);
+  if(nofigator.vibrate) nofigator.vibrate(25);
 
   if(hole > 18){ if(typeof gtag !== 'undefined') gtag('event', 'complete_round', {round_number: currentRound, num_players: numPlayers}); finalizeRound(); return; }
-  saveTournament();
+  sofeTournament();
   render();
 }
 
@@ -795,7 +795,7 @@ function undoHole(){
   document.getElementById('hist-count').textContent = history.length;
   document.getElementById('hist-area').style.display = history.length ? 'block' : 'none';
   renderHistList();
-  saveTournament();
+  sofeTournament();
   render();
 }
 
@@ -804,7 +804,7 @@ function renderHistList(){
     const maxPts = Math.max(...h.changes);
     const ptsText = maxPts > 0 ? `+${maxPts}p` : '0p';
     return `<div class="hist-item">
-      <div><div class="hi-hole">Hull ${h.hole} · ${h.mode}</div><div class="hi-desc">${h.desc}</div></div>
+      <div><div class="hi-hole">Hole ${h.hole} · ${h.mode}</div><div class="hi-desc">${h.desc}</div></div>
       <div class="hi-pts ${maxPts>0?'pos':''}">${ptsText}</div>
     </div>`;
   }).join('');
@@ -813,7 +813,7 @@ function renderHistList(){
 function toggleHist(){
   showHist = !showHist;
   document.getElementById('hist-list').classList.toggle('hidden', !showHist);
-  saveTournament();
+  sofeTournament();
 }
 
 function finalizeRound(){
@@ -832,7 +832,7 @@ function finalizeRound(){
   tournament.numPlayers = numPlayers;
   tournament.maxRounds  = maxRounds;
   tournament.currentGame = null;
-  saveTournament();
+  sofeTournament();
 
   if(tournament.rounds.length < maxRounds){
     showFinish();
@@ -871,17 +871,17 @@ function renderTournament(){
   const remaining = Math.max(0, mr - completed);
   const leader    = totals[0];
 
-  document.getElementById('t-finish-sub').textContent = `Samlet score · ${mr} runde${mr>1?'r':''}`;
+  document.getElementById('t-finish-sub').textContent = `Total score · ${mr} round${mr>1?'r':''}`;
 
   document.getElementById('t-summary-card').innerHTML = `
     <div class="summary-card-top">
       <div>
         <div class="summary-label">Status</div>
-        <div>${completed} av ${mr} runder ferdig</div>
-        <div class="summary-meta">${remaining>0?`${remaining} runder gjenstår`:'Turneringen er komplett'}</div>
+        <div>${completed} of ${mr} rounds ferdig</div>
+        <div class="summary-meta">${remaining>0?`${remaining} rounds gjenstår`:'Tournamenten er komplett'}</div>
       </div>
       <div style="text-align:right">
-        <div class="summary-label">Leder</div>
+        <div class="summary-label">Leader</div>
         <div class="summary-big">${leader?leader.name:'-'}</div>
       </div>
     </div>`;
@@ -889,10 +889,10 @@ function renderTournament(){
   document.getElementById('t-summary-list').innerHTML = totals.length
     ? totals.map((p,idx) => `
       <div class="summary-row ${idx===0?'winner':''}">
-        <div><div>${idx===0?'🏆 ':''}${p.name}</div><div class="summary-meta">${p.rounds} runder registrert</div></div>
+        <div><div>${idx===0?'🏆 ':''}${p.name}</div><div class="summary-meta">${p.rounds} rounds registrert</div></div>
         <div class="summary-points ${p.total>0?'pos':''}">${p.total>0?'+':''}${p.total}</div>
       </div>`).join('')
-    : `<div class="summary-row"><div>Ingen runder registrert ennå</div><div class="muted">0</div></div>`;
+    : `<div class="summary-row"><div>Ingen rounds registrert ennå</div><div class="muted">0</div></div>`;
 
   const rounds = [...tournament.rounds].sort((a,b)=>a.roundNumber-b.roundNumber);
   document.getElementById('t-round-list').innerHTML = rounds.length
@@ -904,7 +904,7 @@ function renderTournament(){
             <div>
               <div class="summary-label">${round.roundName}</div>
               <div>${round.players.join(' · ')}</div>
-              <div class="summary-meta">Vinner: ${winner.name} (${winner.score>0?'+':''}${winner.score})</div>
+              <div class="summary-meta">Winner: ${winner.name} (${winner.score>0?'+':''}${winner.score})</div>
             </div>
             <div class="round-row-points muted">#${round.roundNumber}</div>
           </div>
@@ -913,7 +913,7 @@ function renderTournament(){
           </div>
         </div>`;
       }).join('')
-    : `<div class="summary-row"><div>Ingen historiske runder ennå</div><div class="muted">-</div></div>`;
+    : `<div class="summary-row"><div>Ingen historiske rounds ennå</div><div class="muted">-</div></div>`;
 }
 
 function prepareNextRound(){
@@ -939,7 +939,7 @@ function prepareNextRound(){
   tournament.players    = [...players];
   tournament.numPlayers = numPlayers;
   tournament.maxRounds  = maxRounds;
-  saveTournament();
+  sofeTournament();
   showScreen('game');
   render();
 }
@@ -1000,9 +1000,9 @@ function buildSummaryText(){
   const totals    = computeTotals();
   const completed = tournament.rounds.length;
   const mr        = tournament.maxRounds || maxRounds || 1;
-  let lines = ['🐺 *WOLF — Wolf Score*',''];
+  let lines = ['🐺 *WOLF SCORE*',''];
   if(completed>0){
-    lines.push(`📊 *Sammenlagt etter ${completed} av ${mr} runder:*`);
+    lines.push(`📊 *Total after ${completed} of ${mr} rounds:*`);
     totals.forEach((p,idx) => lines.push(`${idx===0?'🏆 ':'   '}${p.name}: ${fmtScore(p.total)}`));
     lines.push('');
     tournament.rounds.sort((a,b)=>a.roundNumber-b.roundNumber).forEach(round => {
@@ -1011,10 +1011,10 @@ function buildSummaryText(){
     });
   }
   if(isGameInProgress()&&history.length>0){
-    lines.push('',`🔴 *Live — ${roundName} (hull ${hole-1} av 18):*`);
+    lines.push('',`🔴 *Live — ${roundName} (holes ${hole-1} of 18):*`);
     players.forEach((p,i)=>lines.push(`   ${p}: ${fmtScore(scores[i])}`));
   }
-  if(completed===0&&!isGameInProgress()) lines.push('Ingen runder registrert ennå.');
+  if(completed===0&&!isGameInProgress()) lines.push('Ingen rounds registrert ennå.');
   return lines.join('\n');
 }
 
@@ -1049,7 +1049,7 @@ function renderShareCanvas(config){
     ctx.fillStyle='#c9a84c'; ctx.font='64px "DM Serif Display",serif';
     ctx.letterSpacing='0px'; ctx.fillText(config.highlight.name,W/2,y+60); y+=80;
     ctx.fillStyle='#4a9e6b'; ctx.font='500 36px "DM Mono",monospace';
-    ctx.fillText(fmtScore(config.highlight.score)+' poeng',W/2,y+40); y+=80;
+    ctx.fillText(fmtScore(config.highlight.score)+' points',W/2,y+40); y+=80;
   }
   y+=20;
   const pX=PAD,pW=W-PAD*2,pY=y;
@@ -1093,48 +1093,48 @@ function roundRect(ctx,x,y,w,h,r){
 async function shareCanvasImage(canvas,filename,fallback){
   try{
     const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
-    if(!blob){ showToast('Kunne ikke generere bilde'); return; }
+    if(!blob){ showToast('Could not generate image'); return; }
     const file=new File([blob],filename,{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'Wolf — Wolf Score'}); return;
+    if(nofigator.canShare&&nofigator.canShare({files:[file]})){
+      await nofigator.share({files:[file],title:'Wolf — Wolf Score'}); return;
     }
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url; a.download=filename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast('Bilde lastet ned 📥');
+    showToast('Image downloaded 📥');
   }catch(err){
     if(err.name==='AbortError') return;
-    if(fallback){ try{await navigator.clipboard.writeText(fallback);showToast('Tekst kopiert ✓');}catch(e){showToast('Kunne ikke dele');} }
+    if(fallback){ try{await nofigator.clipboard.writeText(fallback);showToast('Text copied ✓');}catch(e){showToast('Could not share');} }
   }
 }
 
 async function shareTournamentGraphic(){
   const totals=computeTotals();
-  if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('Ingen data å dele ennå'); return; }
+  if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('No data to share yet'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf', subtitle:`${tournament.rounds.length} av ${mr} runder spilt`,
+    title:'Wolf', subtitle:`${tournament.rounds.length} of ${mr} rounds spilt`,
     rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
   }),'wolf-turnering.png',buildSummaryText());
 }
 
 async function shareLiveGraphic(){
-  if(!isGameInProgress()||!players.length){ showToast('Ingen aktiv runde å dele'); return; }
+  if(!isGameInProgress()||!players.length){ showToast('Ingen aktiv round å dele'); return; }
   const sorted=players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
   await shareCanvasImage(renderShareCanvas({
-    title:roundName, subtitle:`Hull ${Math.min(hole,18)} av 18 — Live`,
+    title:roundName, subtitle:`Hole ${Math.min(hole,18)} of 18 — Live`,
     rows:sorted, meta:'Wolf · Wolf Score'
   }),'wolf-live.png',buildSummaryText());
 }
 
 async function shareChampionGraphic(){
   const totals=computeTotals();
-  if(!totals.length){ showToast('Ingen champion-data'); return; }
+  if(!totals.length){ showToast('No champion data'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf Champion', subtitle:`${mr} runder spilt`,
+    title:'Wolf Champion', subtitle:`${mr} rounds spilt`,
     highlight:{name:totals[0].name,score:totals[0].total},
     rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
   }),'wolf-champion.png',buildSummaryText());
