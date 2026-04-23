@@ -278,6 +278,11 @@ button,input{font-family:'DM Mono',monospace}
         <div class="bet-btn" id="bet-money" onclick="setBetting(true)">💰 Play for money</div>
       </div>
       <div id="bet-amount-section" style="display:none;margin-top:12px">
+        <div class="bet-label" style="margin-bottom:6px">Settlement type</div>
+        <div class="toggle-row" style="margin-bottom:12px">
+          <div class="bet-btn active" id="settle-split" onclick="setSettlementType('split')">Split</div>
+          <div class="bet-btn" id="settle-winner" onclick="setSettlementType('winner')">Winner takes all</div>
+        </div>
         <div class="bet-label">Dollar value per point</div>
         <div class="bet-amounts">
           <div class="bet-amount-btn active" id="ba-1" onclick="setBetAmount(1)">$1</div>
@@ -353,6 +358,7 @@ button,input{font-family:'DM Mono',monospace}
   <div class="section-title">Historiske rounds</div>
   <div class="round-list" id="t-round-list"></div>
   <button class="btn-primary" onclick="resumeCurrentOrSetup()">Back to app</button>
+  <div id="tournament-settlement-btn"></div>
   <button class="btn-secondary" onclick="shareWhatsAppSummary()">Share summary on WhatsApp</button>
   <button class="btn-secondary" onclick="shareTournamentGraphic()">Share graphic</button>
   <button class="btn-ghost" onclick="goSetup()">New round / setup</button>
@@ -461,6 +467,8 @@ let playForMoney = false;
 let betPerPoint = 1;
 let setupPlayForMoney = false;
 let setupBetPerPoint = 1;
+let setupSettlementType = 'split'; // 'split' or 'winner'
+let settlementType = 'split';
 
 /* ── Fix viewport height on Android ── */
 function setVH(){
@@ -471,6 +479,12 @@ setVH();
 window.addEventListener('resize', setVH);
 
 /* ── Betting functions ── */
+function setSettlementType(type){
+  setupSettlementType = type;
+  document.getElementById('settle-split').classList.toggle('active', type === 'split');
+  document.getElementById('settle-winner').classList.toggle('active', type === 'winner');
+}
+
 function setBetting(val){
   setupPlayForMoney = val;
   document.getElementById('bet-fun').classList.toggle('active', !val);
@@ -499,31 +513,78 @@ function setCustomBet(val){
 }
 
 function calcSettlement(playerNames, finalScores){
-  // Calculate net dollar amounts
-  const balances = finalScores.map((s,i) => ({ name: playerNames[i], pts: s, dollars: s * betPerPoint }));
-  const totalPts = balances.reduce((sum,p) => sum + p.pts, 0);
+  let netDollars;
 
-  // Find who pays who using min-cash-flow algorithm
-  const sorted = [...balances].sort((a,b) => a.dollars - b.dollars);
+  if(settlementType === 'winner'){
+    // Winner takes all: everyone pays winner the difference
+    const maxScore = Math.max(...finalScores);
+    const winners = finalScores.map((s,i) => s === maxScore ? i : -1).filter(i => i >= 0);
+    netDollars = finalScores.map((s,i) => {
+      if(winners.includes(i)){
+        const total = finalScores.reduce((sum,ls,li) =>
+          !winners.includes(li) ? sum + (maxScore - ls) * betPerPoint : sum, 0);
+        return { name: playerNames[i], dollars: Math.round(total / winners.length) };
+      } else {
+        return { name: playerNames[i], dollars: -Math.round((maxScore - s) * betPerPoint) };
+      }
+    });
+  } else {
+    // Split: pay/receive relative to average
+    const avg = finalScores.reduce((a,b) => a+b, 0) / finalScores.length;
+    netDollars = finalScores.map((s,i) => ({
+      name: playerNames[i],
+      dollars: Math.round((s - avg) * betPerPoint)
+    }));
+  }
+
+  // Min cash flow algorithm
+  const debtors   = netDollars.filter(p => p.dollars < -0.01).sort((a,b) => a.dollars - b.dollars);
+  const creditors = netDollars.filter(p => p.dollars >  0.01).sort((a,b) => b.dollars - a.dollars);
   const transactions = [];
-  let i = 0, j = sorted.length - 1;
 
-  while(i < j){
-    const debtor  = sorted[i];
-    const creditor = sorted[j];
-    if(Math.abs(debtor.dollars) < 0.01 && debtor.dollars >= 0){ i++; continue; }
-    if(Math.abs(creditor.dollars) < 0.01 && creditor.dollars <= 0){ j--; continue; }
+  let di = 0, ci = 0;
+  const d = debtors.map(p => ({...p}));
+  const c = creditors.map(p => ({...p}));
 
-    const amount = Math.min(Math.abs(debtor.dollars), creditor.dollars);
+  while(di < d.length && ci < c.length){
+    const amount = Math.min(Math.abs(d[di].dollars), c[ci].dollars);
     if(amount > 0.01){
-      transactions.push({ from: debtor.name, to: creditor.name, amount: Math.round(amount * 100) / 100 });
+      transactions.push({
+        from: d[di].name,
+        to: c[ci].name,
+        amount: Math.round(amount)
+      });
     }
-    debtor.dollars  += amount;
-    creditor.dollars -= amount;
-    if(Math.abs(debtor.dollars)  < 0.01) i++;
-    if(Math.abs(creditor.dollars) < 0.01) j--;
+    d[di].dollars += amount;
+    c[ci].dollars -= amount;
+    if(Math.abs(d[di].dollars) < 0.01) di++;
+    if(Math.abs(c[ci].dollars) < 0.01) ci++;
   }
   return transactions;
+}
+
+function showTournamentSettlement(){
+  const tPlayers = tournament.players.length ? tournament.players : players;
+  const tScores = tPlayers.map(name => {
+    let total = 0;
+    tournament.rounds.forEach(round => {
+      const ri = round.players.indexOf(name);
+      if(ri >= 0) total += round.scores[ri] || 0;
+    });
+    return total;
+  });
+  const transactions = calcSettlement(tPlayers, tScores);
+  const list = document.getElementById('settlement-list');
+  document.getElementById('settlement-list').innerHTML = transactions.length === 0
+    ? '<div class="settlement-even">🤝 Everyone is even!</div>'
+    : transactions.map(t => `
+      <div class="settlement-row">
+        <div class="settlement-from">${t.from} pays</div>
+        <div class="settlement-amount">$${t.amount}</div>
+        <div class="settlement-arrow">↓</div>
+        <div class="settlement-to">${t.to}</div>
+      </div>`).join('');
+  showScreen('settlement');
 }
 
 function showSettlement(){
@@ -536,7 +597,7 @@ function showSettlement(){
     list.innerHTML = transactions.map(t => `
       <div class="settlement-row">
         <div class="settlement-from">${t.from} pays</div>
-        <div class="settlement-amount">$${t.amount.toFixed(2)}</div>
+        <div class="settlement-amount">$${t.amount}</div>
         <div class="settlement-arrow">↓</div>
         <div class="settlement-to">${t.to}</div>
       </div>`).join('');
@@ -641,7 +702,7 @@ function isGameInProgress(){ return players.length >= 3 && hole <= 18; }
 function snapshotCurrentGame(){
   return { players:[...players], numPlayers, scores:[...scores], hole,
     history:JSON.parse(JSON.stringify(history)), showHist, hChoice, hResult,
-    currentRound, roundName, maxRounds, playForMoney, betPerPoint };
+    currentRound, roundName, maxRounds, playForMoney, betPerPoint, settlementType };
 }
 
 function restoreCurrentGame(g){
@@ -656,8 +717,9 @@ function restoreCurrentGame(g){
   currentRound = g.currentRound || 1;
   roundName    = g.roundName || `Round ${currentRound}`;
   maxRounds    = g.maxRounds || tournament.maxRounds || 1;
-  playForMoney = g.playForMoney || false;
-  betPerPoint  = g.betPerPoint  || 1;
+  playForMoney    = g.playForMoney    || false;
+  betPerPoint     = g.betPerPoint     || 1;
+  settlementType  = g.settlementType  || 'split';
   document.getElementById('hist-area').style.display = history.length ? 'block' : 'none';
   document.getElementById('hist-count').textContent = history.length;
   renderHistList();
@@ -781,8 +843,9 @@ function startGame(){
   players      = inputNames;
   numPlayers   = setupNumPlayers;
   maxRounds    = setupMaxRounds;
-  playForMoney = setupPlayForMoney;
-  betPerPoint  = setupBetPerPoint;
+  playForMoney     = setupPlayForMoney;
+  betPerPoint      = setupBetPerPoint;
+  settlementType   = setupSettlementType;
   scores       = new Array(numPlayers).fill(0);
   hole         = 1;
   history      = [];
@@ -1064,7 +1127,7 @@ function renderTournament(){
       <div>
         <div class="summary-label">Status</div>
         <div>${completed} of ${mr} rounds complete</div>
-        <div class="summary-meta">${remaining>0?`${remaining} rounds gjenstår`:'Tournamenten er komplett'}</div>
+        <div class="summary-meta">${remaining>0?`${remaining} rounds gjenstår`:'Tournament complete'}</div>
       </div>
       <div style="text-align:right">
         <div class="summary-label">Leader</div>
@@ -1075,12 +1138,33 @@ function renderTournament(){
   document.getElementById('t-summary-list').innerHTML = totals.length
     ? totals.map((p,idx) => `
       <div class="summary-row ${idx===0?'winner':''}">
-        <div><div>${idx===0?'🏆 ':''}${p.name}</div><div class="summary-meta">${p.rounds} rounds registrert</div></div>
+        <div><div>${idx===0?'🏆 ':''}${p.name}</div><div class="summary-meta">${p.rounds} rounds registered</div></div>
         <div class="summary-points ${p.total>0?'pos':''}">${p.total>0?'+':''}${p.total}</div>
       </div>`).join('')
     : `<div class="summary-row"><div>No rounds registered yet</div><div class="muted">0</div></div>`;
 
   const rounds = [...tournament.rounds].sort((a,b)=>a.roundNumber-b.roundNumber);
+  // Show settlement button if playing for money
+  const tsb = document.getElementById('tournament-settlement-btn');
+  if(tsb){
+    if(playForMoney && tournament.rounds.length > 0){
+      // Calculate totals for settlement
+      const tPlayers = tournament.players.length ? tournament.players : players;
+      const tScores = tPlayers.map(name => {
+        let total = 0;
+        tournament.rounds.forEach(round => {
+          const ri = round.players.indexOf(name);
+          if(ri >= 0) total += round.scores[ri] || 0;
+        });
+        return total;
+      });
+      const transactions = calcSettlement(tPlayers, tScores);
+      tsb.innerHTML = `<button class="btn-primary" style="background:var(--green);color:#fff;width:100%;max-width:340px" onclick="showTournamentSettlement()">💰 Show settlement</button>`;
+    } else {
+      tsb.innerHTML = '';
+    }
+  }
+
   document.getElementById('t-round-list').innerHTML = rounds.length
     ? rounds.map(round => {
         const sorted = round.players.map((name,idx)=>({name,score:round.scores[idx]||0})).sort((a,b)=>b.score-a.score);
