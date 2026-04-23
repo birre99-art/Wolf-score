@@ -415,21 +415,24 @@ button,input{font-family:'DM Mono',monospace}
   <div class="rules-section">
     <div class="rules-section-title">Scoring</div>
     <div class="rules-pts-grid">
-      <div class="rules-pts-section-label">3 players</div>
+      <div class="rules-pts-section-label">3 players — solo Wolf</div>
       <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
       <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
       <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
-      <div class="rules-pts-label">Opponentse wins</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Partner play wins</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
+      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-section-label">3 players — partner play</div>
+      <div class="rules-pts-label">Wolf wins (lone player)</div><div class="rules-pts-val">+2p</div>
+      <div class="rules-pts-label">Partners win</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
       <div class="rules-pts-divider"></div>
-      <div class="rules-pts-section-label">4 players</div>
+      <div class="rules-pts-section-label">4 players — solo Wolf</div>
       <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
       <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
       <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Opponentse wins</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Partner 2v2 wins</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
+      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-section-label">4 players — 2v2 partner play</div>
+      <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
     </div>
   </div>
 
@@ -660,11 +663,13 @@ function renderRulesBox(){
   const n = setupNumPlayers;
   document.getElementById('rules-box').innerHTML = `
     <div class="rules-title">Scoring — ${n} players</div>
-    <div class="rules-row"><span>Blind Wolf wins</span><span>+${n===4?5:4}p</span></div>
-    <div class="rules-row"><span>Lone Wolf wins</span><span>+${n===4?4:3}p</span></div>
-    <div class="rules-row"><span>Wolf wins</span><span>+${n===4?3:2}p</span></div>
-    <div class="rules-row"><span>Opponents win vs solo</span><span>+1p each</span></div>
-    <div class="rules-row"><span>${n===4?'2v2 partner play':'Partner play'} — winning side</span><span>+1p each</span></div>`;
+    <div class="rules-row"><span>Blind Wolf wins (solo)</span><span>+${n===4?5:4}p</span></div>
+    <div class="rules-row"><span>Lone Wolf wins (solo)</span><span>+${n===4?4:3}p</span></div>
+    <div class="rules-row"><span>Wolf wins (solo)</span><span>+${n===4?3:2}p</span></div>
+    <div class="rules-row"><span>Opponents beat solo Wolf</span><span>+1p each</span></div>
+    <div class="rules-row"><span>Wolf wins (partner play)</span><span>+${n===4?3:2}p</span></div>
+    <div class="rules-row"><span>Partners win</span><span>+1p each</span></div>
+    <div class="rules-row"><span>Tied hole</span><span>0p</span></div>`;
 }
 
 /* ── Toast ── */
