@@ -393,7 +393,7 @@ button,input{font-family:'DM Mono',monospace}
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟢</div>
-      <div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Wolfen velger en medspiller <strong>immediately after they hit</strong>. You cannot wait to see others hit first!</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">The Honor chooses a partner <strong>immediately after they hit</strong>. You cannot wait to see others hit first! The player left alone automatically becomes the <strong>Wolf</strong>.</div></div>
     </div>
   </div>
 
@@ -721,15 +721,15 @@ function holeInfo(){
 
   if(hChoice && hChoice.startsWith('partner:')){
     const partnerIdx = parseInt(hChoice.split(':')[1]);
-    const wolfSide   = [c, partnerIdx];
-    const partnerSide = others.filter(i => i !== partnerIdx);
+    const partners   = [c, partnerIdx];
+    const lonePlayer = others.filter(i => i !== partnerIdx);
     return {
       isSolo: false,
-      wolfIdx: c,
-      wolfSide,
-      partnerSide,
-      wolfSideNames: wolfSide.map(i => players[i]).join(' & '),
-      vsSideNames:   partnerSide.map(i => players[i]).join(' & ')
+      wolfIdx: lonePlayer[0],          // lone player is Wolf
+      wolfSide: lonePlayer,            // lone player = Wolf side
+      partnerSide: partners,           // partners = other side
+      wolfSideNames: lonePlayer.map(i => players[i]).join(' & '),
+      vsSideNames:   partners.map(i => players[i]).join(' & ')
     };
   }
   return null;
@@ -812,14 +812,14 @@ function renderChoices(){
   if(!hChoice){
     const partnerChoices = others.map(i => {
       const remaining = others.filter(j => j !== i).map(j => players[j]).join(' & ');
-      const vsLabel = numPlayers === 4 ? `2v2 · vs ${remaining}` : `vs ${remaining}`;
+      const vsLabel = numPlayers === 4 ? `2v2 · ${remaining} becomes Wolf` : `${remaining} becomes Wolf`;
       return `
         <div class="choice-item c-green" onclick="pick('partner:${i}')">
           <div>
             <div class="ci-title">Partner with ${players[i]}</div>
             <div class="ci-sub">${vsLabel}</div>
           </div>
-          <div class="ci-pts green">1p</div>
+          <div class="ci-pts green">Wolf +${numPlayers===4?3:2}p</div>
         </div>`;
     }).join('');
 
@@ -894,12 +894,21 @@ function confirmHole(){
       changes[info.wolfIdx] = info.pts;
       desc = `🐺 ${wolfLabel} wins (+${info.pts}p)`;
     } else {
-      info.wolfSide.forEach(i => { changes[i] = 1; });
-      desc = `${wolfLabel} wins (+1p each)`;
+      // Wolf wins partner play: 3p with 4 players, 2p with 3 players
+      const partnerPts = numPlayers === 4 ? 3 : 2;
+      changes[info.wolfIdx] = partnerPts;
+      desc = `🐺 ${wolfLabel} wins (+${partnerPts}p)`;
     }
   } else if(hResult === 'others'){
-    info.partnerSide.forEach(i => { changes[i] = 1; });
-    desc = `${otherLabel} wins (+1p each)`;
+    if(info.isSolo){
+      // Opponents beat solo Wolf: +1p each
+      info.partnerSide.forEach(i => { changes[i] = 1; });
+      desc = `${otherLabel} wins (+1p each)`;
+    } else {
+      // Partners beat Wolf: +1p each to partners
+      info.partnerSide.forEach(i => { changes[i] = 1; });
+      desc = `${otherLabel} wins (+1p each)`;
+    }
   } else {
     desc = 'Tied';
   }
