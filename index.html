@@ -1389,18 +1389,27 @@ async function shareCanvasImage(canvas,filename,fallback){
     const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
     if(!blob){ showToast('Could not generate image'); return; }
     const file=new File([blob],filename,{type:'image/png'});
+    // Try native share with image file
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'Wolf Score'}); return;
+      try{
+        await navigator.share({files:[file],title:'Wolf Score'});
+        return;
+      }catch(shareErr){
+        if(shareErr.name==='AbortError') return;
+        // Fall through to download
+      }
     }
+    // Fallback: download image
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url; a.download=filename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast('Image downloaded 📥');
+    showToast('Image saved 📥 — share from your photos!');
   }catch(err){
     if(err.name==='AbortError') return;
-    if(fallback){ try{await navigator.clipboard.writeText(fallback);showToast('Text copied ✓');}catch(e){showToast('Could not share — image downloaded instead');} }
+    // Last resort: open WhatsApp with text
+    if(fallback) window.open(`https://wa.me/?text=${encodeURIComponent(fallback)}`, '_blank');
   }
 }
 
