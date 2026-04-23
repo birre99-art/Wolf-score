@@ -186,6 +186,11 @@ button,input{font-family:'DM Mono',monospace}
 .rules-pts-divider{grid-column:1/-1;height:0.5px;background:var(--border);margin:4px 0}
 .rules-pts-section-label{grid-column:1/-1;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
 
+/* Share modal */
+.share-modal-btn{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:12px;padding:16px;font-size:15px;color:var(--text);cursor:pointer;text-align:left;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.share-modal-btn:active{transform:scale(0.98);opacity:0.85}
+.share-modal-icon{font-size:22px}
+
 /* Confirmation modal */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center}
 .modal-box{background:var(--surface2);border:0.5px solid var(--border);border-radius:16px;padding:24px;max-width:300px;width:90%;text-align:center}
@@ -447,6 +452,14 @@ button,input{font-family:'DM Mono',monospace}
   <div id="settlement-list" style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px"></div>
   <button class="btn-primary" onclick="showTournament()">View standings</button>
   <button class="btn-ghost" onclick="goSetup()">Back to setup</button>
+</div>
+
+<div id="share-modal" style="display:none" class="modal-overlay" onclick="closeShareModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">Share</div>
+    <div id="share-modal-content"></div>
+    <div class="modal-btn-cancel" onclick="closeShareModal()" style="margin-top:8px;text-align:center;cursor:pointer">Cancel</div>
+  </div>
 </div>
 
 <div id="confirm-modal" style="display:none" class="modal-overlay" onclick="closeModal()">
@@ -1371,23 +1384,75 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-async function shareCanvasImage(canvas,filename,fallback){
-  try{
-    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
-    if(!blob){ showToast('Could not generate image'); return; }
-    const file=new File([blob],filename,{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'Wolf — Wolf Score'}); return;
-    }
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=filename;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast('Image downloaded 📥');
-  }catch(err){
-    if(err.name==='AbortError') return;
-    if(fallback){ try{await navigator.clipboard.writeText(fallback);showToast('Text copied ✓');}catch(e){showToast('Could not share');} }
+async function shareCanvasImage(canvas, filename, fallback){
+  showShareModal(canvas, filename, fallback);
+}
+
+let pendingCanvas = null;
+let pendingFilename = null;
+let pendingText = null;
+
+function showShareModal(canvas, filename, text){
+  pendingCanvas = canvas;
+  pendingFilename = filename;
+  pendingText = text;
+  
+  const content = document.getElementById('share-modal-content');
+  content.innerHTML = `
+    <div class="share-modal-btn" onclick="shareAsImage()">
+      <span class="share-modal-icon">🖼️</span>
+      <div><div>Share as image</div><div style="font-size:11px;color:var(--muted)">Opens share sheet with graphic</div></div>
+    </div>
+    <div class="share-modal-btn" onclick="shareAsText()">
+      <span class="share-modal-icon">💬</span>
+      <div><div>Share via WhatsApp</div><div style="font-size:11px;color:var(--muted)">Text summary</div></div>
+    </div>
+    <div class="share-modal-btn" onclick="downloadImage()">
+      <span class="share-modal-icon">📥</span>
+      <div><div>Download image</div><div style="font-size:11px;color:var(--muted)">Save to device</div></div>
+    </div>`;
+  document.getElementById('share-modal').style.display = 'flex';
+}
+
+function closeShareModal(){
+  document.getElementById('share-modal').style.display = 'none';
+  pendingCanvas = null; pendingFilename = null; pendingText = null;
+}
+
+async function shareAsImage(){
+  closeShareModal();
+  if(!pendingCanvas) return;
+  const blob = await new Promise(res => pendingCanvas.toBlob(res, 'image/png'));
+  const file = new File([blob], pendingFilename, {type:'image/png'});
+  try {
+    await navigator.share({files:[file], title:'Wolf Score'});
+  } catch(e){
+    if(e.name !== 'AbortError') shareAsText();
+  }
+}
+
+function shareAsText(){
+  closeShareModal();
+  if(pendingText) window.open(`https://wa.me/?text=${encodeURIComponent(pendingText)}`, '_blank');
+}
+
+async function downloadImage(){
+  closeShareModal();
+  if(!pendingCanvas) return;
+  const blob = await new Promise(res => pendingCanvas.toBlob(res, 'image/png'));
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = pendingFilename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Image downloaded 📥');
+}
+
+function fallbackShare(text){
+  if(text){
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  } else {
+    showToast('Could not share');
   }
 }
 
