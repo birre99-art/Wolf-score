@@ -1401,19 +1401,9 @@ async function shareTournamentGraphic(){
   }),'wolf-turnering.png',buildSummaryText());
 }
 
-async function shareLiveGraphic(){
+function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
   const text = buildSummaryText();
-  // Try native share first, fallback to WhatsApp
-  try {
-    if(navigator.share){
-      await navigator.share({ title: 'Wolf Score — Live', text });
-      return;
-    }
-  } catch(e){
-    if(e.name === 'AbortError') return;
-  }
-  // Fallback to WhatsApp
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
