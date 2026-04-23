@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -228,9 +228,9 @@ button,input{font-family:'DM Mono',monospace}
     <div class="rules-box" id="rules-box-active"></div>
     <button class="btn-primary" onclick="resumeCurrentOrSetup()">Continue tournament</button>
     <button class="btn-secondary" onclick="showTournament()">View summary</button>
-    <button class="btn-secondary" onclick="showScreen('rules')">📖 Regler</button>
+    <button class="btn-secondary" onclick="showScreen('rules')">📖 Rules</button>
     <button class="btn-danger" onclick="confirmNewTournament()">End and start new tournament</button>
-    <div class="helper-text">Scores are sofed. Tap «Continue» to keep playing.</div>
+    <div class="helper-text">Scores are saved. Tap «Continue» to keep playing.</div>
   </div>
 
   <!-- NEW TOURNAMENT MODE -->
@@ -285,8 +285,8 @@ button,input{font-family:'DM Mono',monospace}
     </div>
     <div class="rules-box" id="rules-box"></div>
     <button class="btn-primary" onclick="startGame()">Start tournament</button>
-    <button class="btn-secondary" onclick="showScreen('rules')">📖 Regler</button>
-    <div class="helper-text">Scores are sofed automatically between rounds and days.</div>
+    <button class="btn-secondary" onclick="showScreen('rules')">📖 Rules</button>
+    <div class="helper-text">Scores are saved automatically between rounds and days.</div>
   </div>
 </div>
 
@@ -297,7 +297,7 @@ button,input{font-family:'DM Mono',monospace}
       <div class="hole-num" id="g-hole">1</div>
     </div>
     <div class="ctrl-block">
-      <div class="ctrl-tag">Wolf</div>
+      <div class="ctrl-tag">Honor</div>
       <div class="ctrl-name" id="g-ctrl"></div>
     </div>
   </div>
@@ -346,7 +346,7 @@ button,input{font-family:'DM Mono',monospace}
   <button class="btn-primary" onclick="resumeCurrentOrSetup()">Back to app</button>
   <button class="btn-secondary" onclick="shareWhatsAppSummary()">Share summary on WhatsApp</button>
   <button class="btn-secondary" onclick="shareTournamentGraphic()">Share graphic</button>
-  <button class="btn-ghost" onclick="goSetup()">Ny round / oppsett</button>
+  <button class="btn-ghost" onclick="goSetup()">New round / setup</button>
 </div>
 
 <div id="champion" class="screen">
@@ -370,15 +370,15 @@ button,input{font-family:'DM Mono',monospace}
   <div class="rules-section">
     <div class="rules-section-title">Before you start</div>
     <div class="rules-text">
-      The order <strong>is drawn randomly</strong> før firste holes og er fast gjennom hele roundn.<br><br>
-      The player who is <strong>first in the order is the Wolf</strong> på holes 1, deretter rullerer det holes for holes.<br><br>
-      Wolfen slår ut <strong>first</strong> på hvert holes. Den med flest points etter 18 holes wins. Ved delt holes deles <strong>no points</strong> are awarded.<br><br>
-      <strong>4 players — holes 17 og 18:</strong> The player with <strong>fewest points</strong> er styrer på holes 17. The player with fewest points etter holes 17 er styrer på holes 18.
+      The order <strong>is drawn randomly</strong> before the first hole and is fixed for the entire round.<br><br>
+      The player who is <strong>first in the order has the Honor</strong> on hole 1, then it rotates hole by hole.<br><br>
+      The Honor tees off <strong>first</strong> on every hole. Most points after 18 holes wins. On a tied hole, <strong>no points</strong> are awarded.<br><br>
+      <strong>4 players — holes 17 &amp; 18:</strong> The player with <strong>fewest points</strong> has the Honor on hole 17. The player with fewest points after hole 17 has the Honor on hole 18.
     </div>
   </div>
 
   <div class="rules-section">
-    <div class="rules-section-title">How the Wolf chooses</div>
+    <div class="rules-section-title">How the Honor chooses</div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🔴</div>
       <div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>før</strong> styreren selv slår. Går solo vs alle.</div></div>
@@ -389,7 +389,7 @@ button,input{font-family:'DM Mono',monospace}
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">⚪</div>
-      <div class="rules-type-body"><div class="rules-type-name">Wolf</div><div class="rules-type-desc">Wolfen har ikke valgt partner innen alle andre har slått — går automatisk solo.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Honor</div><div class="rules-type-desc">Wolfen har ikke valgt partner innen alle andre har slått — går automatisk solo.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟢</div>
@@ -418,7 +418,7 @@ button,input{font-family:'DM Mono',monospace}
     </div>
   </div>
 
-  <button class="btn-primary" onclick="goSetup()">Tilbake</button>
+  <button class="btn-primary" onclick="goSetup()">Back</button>
 </div>
 
 <div id="settlement" class="screen">
@@ -534,7 +534,7 @@ let showHist = false;
 let hChoice = null;
 let hResult = null;
 let currentRound = 1;
-let roundName = 'Runde 1';
+let roundName = 'Round 1';
 let maxRounds = 1;
 let setupNumPlayers = 3;
 let setupMaxRounds = 1;
@@ -583,7 +583,7 @@ function renderRulesBox(){
     <div class="rules-row"><span>Lone Wolf wins</span><span>+${n===4?4:3}p</span></div>
     <div class="rules-row"><span>Wolf wins</span><span>+${n===4?3:2}p</span></div>
     <div class="rules-row"><span>Opponents win vs solo</span><span>+1p each</span></div>
-    <div class="rules-row"><span>${n===4?'2v2 lagspill':'Partner play'} — winslaget</span><span>+1p each</span></div>`;
+    <div class="rules-row"><span>${n===4?'2v2 partner play':'Partner play'} — winning side</span><span>+1p each</span></div>`;
 }
 
 /* ── Toast ── */
@@ -634,7 +634,7 @@ function restoreCurrentGame(g){
   hChoice      = g.hChoice || null;
   hResult      = g.hResult || null;
   currentRound = g.currentRound || 1;
-  roundName    = g.roundName || `Runde ${currentRound}`;
+  roundName    = g.roundName || `Round ${currentRound}`;
   maxRounds    = g.maxRounds || tournament.maxRounds || 1;
   playForMoney = g.playForMoney || false;
   betPerPoint  = g.betPerPoint  || 1;
@@ -672,7 +672,7 @@ function updateResetButton(){
       <div class="rules-row"><span>Lone Wolf wins</span><span>+${lone}p</span></div>
       <div class="rules-row"><span>Wolf wins</span><span>+${wolf}p</span></div>
       <div class="rules-row"><span>Opponents win vs solo</span><span>+1p each</span></div>
-      <div class="rules-row"><span>${n===4?'2v2 lagspill':'Partner play'} — winslaget</span><span>+1p each</span></div>`;
+      <div class="rules-row"><span>${n===4?'2v2 partner play':'Partner play'} — winning side</span><span>+1p each</span></div>`;
   } else {
     activeDiv.style.display = 'none';
     newDiv.style.display = 'flex';
@@ -739,13 +739,13 @@ function holeInfo(){
 function startGame(){
   const inputNames = ['p1','p2','p3','p4'].slice(0, setupNumPlayers)
     .map(id => document.getElementById(id).value.trim())
-    .map((name,i) => name || `Spiller ${i+1}`);
+    .map((name,i) => name || `Player ${i+1}`);
 
   if(tournament.rounds.length > 0){
     const existingKey = tournament.players.join('|');
     const newKey      = inputNames.join('|');
     if(existingKey !== newKey || tournament.numPlayers !== setupNumPlayers){
-      if(!confirm('Du har en eksisterende turnering med andre players. Vil du starte en ny turnering?')) return;
+      if(!confirm('You have an existing tournament with other players. Start a new tournament?')) return;
       tournament = defaultTournament();
     }
   }
@@ -762,7 +762,7 @@ function startGame(){
   hChoice      = null;
   hResult      = null;
   currentRound = getNextRoundNumber();
-  roundName    = `Runde ${currentRound}`;
+  roundName    = `Round ${currentRound}`;
 
   tournament.players    = [...players];
   tournament.numPlayers = numPlayers;
@@ -820,9 +820,9 @@ function renderChoices(){
     }).join('');
 
     const specialHole = numPlayers === 4 && hole >= 17;
-    const specialNote = specialHole ? ' 🏴 (fewest points)' : '';
+    const specialNote = specialHole ? ' 🏴 (fewest points — has Honor)' : '';
     area.innerHTML = `
-      <div class="choice-label">${roundName} · Wolf: ${cn()}${specialNote} — velg type holes</div>
+      <div class="choice-label">${roundName} · Wolf: ${cn()}${specialNote} — choose hole type</div>
       <div class="choices">
         <div class="choice-item c-gold" onclick="pick('blind')">
           <div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} is Wolf — declared before tee shot</div></div>
@@ -833,7 +833,7 @@ function renderChoices(){
           <div class="ci-pts gold">${numPlayers===4?4:3}p</div>
         </div>
         <div class="choice-item c-red" onclick="pick('wolf')">
-          <div><div class="ci-title">Wolf</div><div class="ci-sub">${cn()} is Wolf — after all tee shots</div></div>
+          <div><div class="ci-title">Honor</div><div class="ci-sub">${cn()} is Wolf — after all tee shots</div></div>
           <div class="ci-pts gold">${numPlayers===4?3:2}p</div>
         </div>
         ${partnerChoices}
@@ -856,7 +856,7 @@ function renderChoices(){
         <span class="team-partners">${otherLabel}</span>
       </div>
     </div>
-    <div class="result-label">Hvem wins holeset?</div>
+    <div class="result-label">Who wins the hole?</div>
     <div class="result-btns">
       <div class="result-btn r-wolf ${hResult==='wolf'?'selected':''}" onclick="setRes('wolf')">
         <div><div class="rb-tag wolf-tag">🐺 Wolf side wins</div><div class="rb-names">${wolfLabel}</div></div>
@@ -871,7 +871,7 @@ function renderChoices(){
         <div class="rb-pts muted">0p</div>
       </div>
     </div>
-    ${hResult ? `<button class="confirm-btn" onclick="confirmHole()">Bekreft holes ${hole}</button>` : ''}`;
+    ${hResult ? `<button class="confirm-btn" onclick="confirmHole()">Confirm hole ${hole}</button>` : ''}`;
 }
 
 function pick(c){ hChoice = c; hResult = null; sofeTournament(); render(); }
@@ -1023,7 +1023,7 @@ function renderTournament(){
     <div class="summary-card-top">
       <div>
         <div class="summary-label">Status</div>
-        <div>${completed} of ${mr} rounds ferdig</div>
+        <div>${completed} of ${mr} rounds complete</div>
         <div class="summary-meta">${remaining>0?`${remaining} rounds gjenstår`:'Tournamenten er komplett'}</div>
       </div>
       <div style="text-align:right">
@@ -1038,7 +1038,7 @@ function renderTournament(){
         <div><div>${idx===0?'🏆 ':''}${p.name}</div><div class="summary-meta">${p.rounds} rounds registrert</div></div>
         <div class="summary-points ${p.total>0?'pos':''}">${p.total>0?'+':''}${p.total}</div>
       </div>`).join('')
-    : `<div class="summary-row"><div>Ingen rounds registrert ennå</div><div class="muted">0</div></div>`;
+    : `<div class="summary-row"><div>No rounds registered yet</div><div class="muted">0</div></div>`;
 
   const rounds = [...tournament.rounds].sort((a,b)=>a.roundNumber-b.roundNumber);
   document.getElementById('t-round-list').innerHTML = rounds.length
@@ -1059,7 +1059,7 @@ function renderTournament(){
           </div>
         </div>`;
       }).join('')
-    : `<div class="summary-row"><div>Ingen historiske rounds ennå</div><div class="muted">-</div></div>`;
+    : `<div class="summary-row"><div>No rounds yet</div><div class="muted">-</div></div>`;
 }
 
 function prepareNextRound(){
@@ -1080,7 +1080,7 @@ function prepareNextRound(){
   hChoice      = null;
   hResult      = null;
   currentRound = tournament.rounds.length + 1;
-  roundName    = `Runde ${currentRound}`;
+  roundName    = `Round ${currentRound}`;
 
   tournament.players    = [...players];
   tournament.numPlayers = numPlayers;
@@ -1160,7 +1160,7 @@ function buildSummaryText(){
     lines.push('',`🔴 *Live — ${roundName} (holes ${hole-1} of 18):*`);
     players.forEach((p,i)=>lines.push(`   ${p}: ${fmtScore(scores[i])}`));
   }
-  if(completed===0&&!isGameInProgress()) lines.push('Ingen rounds registrert ennå.');
+  if(completed===0&&!isGameInProgress()) lines.push('No rounds registered yet.');
   return lines.join('\n');
 }
 
@@ -1302,7 +1302,7 @@ window.onload = function(){
   // Set up new-tournament fields in case they are shown
   setPlayerCount(np);
   document.getElementById('maxRoundsDisplay').textContent = mr;
-  ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||''; });
+  ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||`Player ${i+1}`; });
   // updateResetButton decides active vs new mode
   updateResetButton();
   showScreen('setup');
