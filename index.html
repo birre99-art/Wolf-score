@@ -1385,7 +1385,37 @@ function roundRect(ctx,x,y,w,h,r){
 }
 
 async function shareCanvasImage(canvas, filename, fallback){
-  showShareModal(canvas, filename, fallback);
+  try{
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    if(!blob){ showToast('Could not generate image'); return; }
+    const file = new File([blob], filename, {type:'image/png'});
+    // Try native share with image - opens share sheet on all platforms
+    if(navigator.share){
+      try{
+        await navigator.share({files:[file], title:'Wolf Score'});
+        return;
+      } catch(e){
+        if(e.name === 'AbortError') return;
+        // Not supported with files, try without
+        try{
+          await navigator.share({title:'Wolf Score', text: fallback || ''});
+          return;
+        } catch(e2){
+          if(e2.name === 'AbortError') return;
+        }
+      }
+    }
+    // Fallback: download image
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    showToast('Image downloaded 📥');
+  } catch(err){
+    if(err.name === 'AbortError') return;
+    showToast('Could not share — try downloading instead');
+  }
 }
 
 let pendingCanvas = null;
@@ -1466,10 +1496,16 @@ async function shareTournamentGraphic(){
   }),'wolf-turnering.png',buildSummaryText());
 }
 
-function shareLiveGraphic(){
+async function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
-  const text = buildSummaryText();
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const sorted = players.map((name,i) => ({name, score:scores[i]})).sort((a,b) => b.score-a.score);
+  const canvas = renderShareCanvas({
+    title: roundName,
+    subtitle: `Hole ${Math.min(hole,18)} of 18 — Live`,
+    rows: sorted,
+    meta: 'Wolf Score'
+  });
+  await shareCanvasImage(canvas, 'wolf-live.png', buildSummaryText());
 }
 
 async function shareChampionGraphic(){
