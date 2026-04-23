@@ -800,6 +800,10 @@ function confirmNewTournament(){
   document.getElementById('confirm-modal').style.display = 'flex';
 }
 
+function closeShareModal(){
+  document.getElementById('share-modal').style.display = 'none';
+}
+
 function closeModal(){
   document.getElementById('confirm-modal').style.display = 'none';
 }
@@ -1441,10 +1445,6 @@ async function shareCanvasImage(canvas,filename,fallback){
 }
 
 
-let _previewBlob = null;
-let _previewFilename = null;
-
-
 async function shareTournamentGraphic(){
   const totals=computeTotals();
   if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('No data to share yet'); return; }
@@ -1474,3 +1474,30 @@ async function shareChampionGraphic(){
     rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
   }),'wolf-champion.png',buildSummaryText());
 }
+
+
+/* ── Init ── */
+window.onload = function(){
+  loadTournament();
+  if(tournament.currentGame){
+    numPlayers = tournament.currentGame.numPlayers || tournament.currentGame.players.length;
+    maxRounds  = tournament.currentGame.maxRounds  || tournament.maxRounds || 1;
+    playForMoney   = tournament.currentGame.playForMoney   || false;
+    betPerPoint    = tournament.currentGame.betPerPoint    || 1;
+    settlementType = tournament.currentGame.settlementType || 'split';
+    restoreCurrentGame(tournament.currentGame);
+    showScreen('game'); render(); return;
+  }
+  const np = tournament.numPlayers || 3;
+  const mr = tournament.maxRounds  || 1;
+  setupNumPlayers = np;
+  setupMaxRounds  = mr;
+  setPlayerCount(np);
+  document.getElementById('maxRoundsDisplay').textContent = mr;
+  ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||''; });
+  updateResetButton();
+  showScreen('setup');
+};
+</script>
+</body>
+</html>
