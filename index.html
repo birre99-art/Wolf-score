@@ -1404,6 +1404,22 @@ function roundRect(ctx,x,y,w,h,r){
 let _previewBlob = null;
 let _previewFilename = null;
 
+function closeImgPreview(){
+  document.getElementById('img-preview-modal').style.display = 'none';
+  document.getElementById('img-preview-img').src = '';
+  _previewBlob = null;
+}
+
+function downloadPreviewImg(){
+  if(!_previewBlob) return;
+  const url = URL.createObjectURL(_previewBlob);
+  const a = document.createElement('a');
+  a.href = url; a.download = _previewFilename || 'wolf-score.png';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Image downloaded 📥');
+}
+
 async function shareCanvasImage(canvas,filename,fallback){
   try{
     const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
