@@ -908,7 +908,13 @@ function renderChoices(){
   if(!hChoice){
     const partnerChoices = others.map(i => {
       const remaining = others.filter(j => j !== i).map(j => players[j]).join(' & ');
-      const vsLabel = numPlayers === 4 ? `2v2 · ${remaining} becomes Wolf` : `${remaining} becomes Wolf`;
+      const remainingPlayers = others.filter(j => j !== i);
+      const wolfPlayer = remainingPlayers.length === 1 
+        ? players[remainingPlayers[0]] 
+        : remainingPlayers.map(j => players[j]).join(' & ');
+      const vsLabel = numPlayers === 4 
+        ? `2v2 · vs ${remainingPlayers.map(j => players[j]).join(' & ')}` 
+        : `${wolfPlayer} becomes Wolf`;
       return `
         <div class="choice-item c-green" onclick="pick('partner:${i}')">
           <div>
@@ -1397,11 +1403,18 @@ async function shareTournamentGraphic(){
 
 async function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
-  const sorted=players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
-  await shareCanvasImage(renderShareCanvas({
-    title:roundName, subtitle:`Holee ${Math.min(hole,18)} of 18 — Live`,
-    rows:sorted, meta:'Wolf · Wolf Score'
-  }),'wolf-live.png',buildSummaryText());
+  const text = buildSummaryText();
+  // Try native share first, fallback to WhatsApp
+  try {
+    if(navigator.share){
+      await navigator.share({ title: 'Wolf Score — Live', text });
+      return;
+    }
+  } catch(e){
+    if(e.name === 'AbortError') return;
+  }
+  // Fallback to WhatsApp
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 async function shareChampionGraphic(){
