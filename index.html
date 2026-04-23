@@ -416,7 +416,7 @@ button,input{font-family:'DM Mono',monospace}
     </div>
   </div>
 
-  <div class="rules-section">
+  <div class="rules-section" id="rules-dynamic-section">
     <div class="rules-section-title">Scoring</div>
     <div class="rules-pts-grid">
       <div class="rules-pts-section-label">3 players — solo Wolf</div>
@@ -425,7 +425,8 @@ button,input{font-family:'DM Mono',monospace}
       <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
       <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-section-label">3 players — partner play</div>
-      <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Lone player wins</div><div class="rules-pts-val">+2p</div>
+      <div class="rules-pts-label">Partner side wins</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
       <div class="rules-pts-divider"></div>
       <div class="rules-pts-section-label">4 players — solo Wolf</div>
@@ -540,6 +541,7 @@ function setBetting(val){
   document.getElementById('bet-fun').classList.toggle('active', !val);
   document.getElementById('bet-money').classList.toggle('active', val);
   document.getElementById('bet-amount-section').style.display = val ? 'block' : 'none';
+  renderRulesBox();
 }
 
 function setBetAmount(amount){
@@ -584,7 +586,20 @@ function changeMaxRounds(delta){
 
 function renderRulesBox(){
   const n = setupNumPlayers;
-  document.getElementById('rules-box').innerHTML = `
+  const box = document.getElementById('rules-box');
+  if(playForMoney || setupPlayForMoney){
+    box.innerHTML = `
+      <div class="rules-title">Money rules — ${n} players</div>
+      <div class="rules-row"><span>Blind Wolf wins</span><span>${n===4?'+5x':' +4x'} stake from each</span></div>
+      <div class="rules-row"><span>Lone Wolf wins</span><span>${n===4?'+4x':' +3x'} stake from each</span></div>
+      <div class="rules-row"><span>Wolf wins</span><span>${n===4?'+3x':' +2x'} stake from each</span></div>
+      <div class="rules-row"><span>Solo Wolf loses</span><span>-1x stake to each</span></div>
+      <div class="rules-row"><span>${n===3?'Lone player wins vs pair':'Winning side in partner play'}</span><span>${n===3?'+2x / -2x':'±1x each'}</span></div>
+      <div class="rules-row"><span>Tied hole</span><span>$0</span></div>`;
+    return;
+  }
+
+  box.innerHTML = `
     <div class="rules-title">Scoring — ${n} players</div>
     <div class="rules-row"><span>Blind Wolf wins (solo)</span><span>+${n===4?5:4}p</span></div>
     <div class="rules-row"><span>Lone Wolf wins (solo)</span><span>+${n===4?4:3}p</span></div>
@@ -811,7 +826,55 @@ function showScreen(id){
   const el = document.getElementById(id);
   el.classList.add('active');
   el.scrollTop = 0;
+  if(id === 'rules') renderRulesScreen();
   setTimeout(() => { el.scrollTop = 0; }, 50);
+}
+
+function renderRulesScreen(){
+  const n = setupNumPlayers || tournament.numPlayers || 3;
+  const section = document.getElementById('rules-dynamic-section');
+  if(!section) return;
+
+  if(playForMoney || setupPlayForMoney){
+    section.innerHTML = `
+      <div class="rules-section-title">Money rules</div>
+      <div class="rules-pts-grid">
+        <div class="rules-pts-section-label">${n} players — solo Wolf wins</div>
+        <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">${n===4?'5x':'4x'} stake from each</div>
+        <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">${n===4?'4x':'3x'} stake from each</div>
+        <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">${n===4?'3x':'2x'} stake from each</div>
+        <div class="rules-pts-label">Solo Wolf loses</div><div class="rules-pts-val">1x stake to each opponent</div>
+        <div class="rules-pts-divider"></div>
+        <div class="rules-pts-section-label">${n===3?'3 players — partner chosen':'4 players — partner play'}</div>
+        <div class="rules-pts-label">${n===3?'Lone player wins':'Winning side'}</div><div class="rules-pts-val">${n===3?'2x stake total':'1x stake each'}</div>
+        <div class="rules-pts-label">${n===3?'Lone player loses':'Losing side'}</div><div class="rules-pts-val">${n===3?'-2x stake total':'-1x stake each'}</div>
+        <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">$0</div>
+      </div>`;
+    return;
+  }
+
+  section.innerHTML = `
+    <div class="rules-section-title">Scoring</div>
+    <div class="rules-pts-grid">
+      <div class="rules-pts-section-label">3 players — solo Wolf</div>
+      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
+      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
+      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
+      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-section-label">3 players — partner play</div>
+      <div class="rules-pts-label">Lone player wins</div><div class="rules-pts-val">+2p</div>
+      <div class="rules-pts-label">Partner side wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
+      <div class="rules-pts-divider"></div>
+      <div class="rules-pts-section-label">4 players — solo Wolf</div>
+      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
+      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
+      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
+      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-section-label">4 players — 2v2 partner play</div>
+      <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
+    </div>`;
 }
 
 function render(){
