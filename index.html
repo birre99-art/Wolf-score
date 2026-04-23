@@ -185,6 +185,28 @@ button,input{font-family:'DM Mono',monospace}
 .rules-pts-val{font-size:13px;color:var(--gold);text-align:right;font-weight:500}
 .rules-pts-divider{grid-column:1/-1;height:0.5px;background:var(--border);margin:4px 0}
 .rules-pts-section-label{grid-column:1/-1;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+/* Betting styles */
+.bet-toggle-row{display:flex;gap:8px}
+.bet-btn{flex:1;background:var(--surface2);border:0.5px solid var(--border);border-radius:12px;padding:12px 8px;font-size:14px;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.15s}
+.bet-btn.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold)}
+.bet-btn:active{transform:scale(0.97)}
+.bet-amounts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.bet-amount-btn{background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.bet-amount-btn.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold)}
+.bet-custom-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.bet-custom-input{flex:1;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:16px;color:var(--text);outline:none}
+.bet-custom-input:focus{border-color:var(--gold-dim)}
+.bet-label{font-size:12px;color:var(--muted)}
+.score-box-money{font-size:12px;color:var(--gold);margin-top:2px}
+/* Settlement screen */
+#settlement{align-items:center;justify-content:center;padding:2rem;gap:1.25rem;overflow-y:auto}
+.settlement-row{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;width:100%;max-width:340px}
+.settlement-from{font-size:12px;color:var(--muted);margin-bottom:4px}
+.settlement-arrow{font-size:18px;color:var(--gold);margin:2px 0}
+.settlement-amount{font-size:28px;font-weight:500;color:var(--green)}
+.settlement-to{font-size:14px;color:var(--text)}
+.settlement-even{background:var(--surface);border:0.5px solid var(--green);border-radius:12px;padding:14px 16px;width:100%;max-width:340px;text-align:center;color:var(--green)}
 </style>
 </head>
 <body>
@@ -240,6 +262,27 @@ button,input{font-family:'DM Mono',monospace}
         <div class="player-num">4</div><input id="p4" type="text" placeholder="Player 4" maxlength="12" />
       </div>
     </div>
+    <div class="setup-card" style="width:100%;max-width:340px">
+      <div class="setup-label">Stakes</div>
+      <div class="bet-toggle-row">
+        <div class="bet-btn active" id="bet-fun" onclick="setBetting(false)">🎯 Play for fun</div>
+        <div class="bet-btn" id="bet-money" onclick="setBetting(true)">💰 Play for money</div>
+      </div>
+      <div id="bet-amount-section" style="display:none;margin-top:12px">
+        <div class="bet-label">Dollar value per point</div>
+        <div class="bet-amounts">
+          <div class="bet-amount-btn active" id="ba-1" onclick="setBetAmount(1)">$1</div>
+          <div class="bet-amount-btn" id="ba-2" onclick="setBetAmount(2)">$2</div>
+          <div class="bet-amount-btn" id="ba-5" onclick="setBetAmount(5)">$5</div>
+          <div class="bet-amount-btn" id="ba-10" onclick="setBetAmount(10)">$10</div>
+          <div class="bet-amount-btn" id="ba-20" onclick="setBetAmount(20)">$20</div>
+        </div>
+        <div class="bet-custom-row">
+          <input class="bet-custom-input" id="bet-custom" type="number" min="1" placeholder="Custom amount" oninput="setCustomBet(this.value)" />
+          <span class="bet-label">$/pt</span>
+        </div>
+      </div>
+    </div>
     <div class="rules-box" id="rules-box"></div>
     <button class="btn-primary" onclick="startGame()">Start tournament</button>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Regler</button>
@@ -282,6 +325,7 @@ button,input{font-family:'DM Mono',monospace}
     <div class="finish-sub">Wolf Score</div>
   </div>
   <div class="finish-scores" id="finish-scores"></div>
+  <div id="finish-settlement-btn"></div>
   <button class="btn-primary" onclick="showTournament()">View standings</button>
   <button class="btn-secondary" onclick="shareWhatsAppSummary()">Share on WhatsApp</button>
   <button class="btn-secondary" onclick="shareTournamentGraphic()">Share graphic</button>
@@ -377,10 +421,26 @@ button,input{font-family:'DM Mono',monospace}
   <button class="btn-primary" onclick="goSetup()">Tilbake</button>
 </div>
 
+<div id="settlement" class="screen">
+  <div>
+    <div class="finish-title">💰 Settlement</div>
+    <div class="finish-sub">Who pays who</div>
+  </div>
+  <div id="settlement-list" style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px"></div>
+  <button class="btn-primary" onclick="showTournament()">View standings</button>
+  <button class="btn-ghost" onclick="goSetup()">Back to setup</button>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
 const STORAGE_KEY = 'wolfScore_v1';
+
+/* ── Betting state ── */
+let playForMoney = false;
+let betPerPoint = 1;
+let setupPlayForMoney = false;
+let setupBetPerPoint = 1;
 
 /* ── Fix viewport height on Android ── */
 function setVH(){
@@ -389,6 +449,80 @@ function setVH(){
 }
 setVH();
 window.addEventListener('resize', setVH);
+
+/* ── Betting functions ── */
+function setBetting(val){
+  setupPlayForMoney = val;
+  document.getElementById('bet-fun').classList.toggle('active', !val);
+  document.getElementById('bet-money').classList.toggle('active', val);
+  document.getElementById('bet-amount-section').style.display = val ? 'block' : 'none';
+}
+
+function setBetAmount(amount){
+  setupBetPerPoint = amount;
+  document.getElementById('bet-custom').value = '';
+  [1,2,5,10,20].forEach(a => {
+    const el = document.getElementById('ba-'+a);
+    if(el) el.classList.toggle('active', a === amount);
+  });
+}
+
+function setCustomBet(val){
+  const amount = parseFloat(val);
+  if(amount > 0){
+    setupBetPerPoint = amount;
+    [1,2,5,10,20].forEach(a => {
+      const el = document.getElementById('ba-'+a);
+      if(el) el.classList.remove('active');
+    });
+  }
+}
+
+function calcSettlement(playerNames, finalScores){
+  // Calculate net dollar amounts
+  const balances = finalScores.map((s,i) => ({ name: playerNames[i], pts: s, dollars: s * betPerPoint }));
+  const totalPts = balances.reduce((sum,p) => sum + p.pts, 0);
+
+  // Find who pays who using min-cash-flow algorithm
+  const sorted = [...balances].sort((a,b) => a.dollars - b.dollars);
+  const transactions = [];
+  let i = 0, j = sorted.length - 1;
+
+  while(i < j){
+    const debtor  = sorted[i];
+    const creditor = sorted[j];
+    if(Math.abs(debtor.dollars) < 0.01 && debtor.dollars >= 0){ i++; continue; }
+    if(Math.abs(creditor.dollars) < 0.01 && creditor.dollars <= 0){ j--; continue; }
+
+    const amount = Math.min(Math.abs(debtor.dollars), creditor.dollars);
+    if(amount > 0.01){
+      transactions.push({ from: debtor.name, to: creditor.name, amount: Math.round(amount * 100) / 100 });
+    }
+    debtor.dollars  += amount;
+    creditor.dollars -= amount;
+    if(Math.abs(debtor.dollars)  < 0.01) i++;
+    if(Math.abs(creditor.dollars) < 0.01) j--;
+  }
+  return transactions;
+}
+
+function showSettlement(){
+  const transactions = calcSettlement(players, scores);
+  const list = document.getElementById('settlement-list');
+
+  if(transactions.length === 0){
+    list.innerHTML = '<div class="settlement-even">🤝 Everyone is even — no money changes hands!</div>';
+  } else {
+    list.innerHTML = transactions.map(t => `
+      <div class="settlement-row">
+        <div class="settlement-from">${t.from} pays</div>
+        <div class="settlement-amount">$${t.amount.toFixed(2)}</div>
+        <div class="settlement-arrow">↓</div>
+        <div class="settlement-to">${t.to}</div>
+      </div>`).join('');
+  }
+  showScreen('settlement');
+}
 
 /* ── State ── */
 let players = [];
@@ -487,7 +621,7 @@ function isGameInProgress(){ return players.length >= 3 && hole <= 18; }
 function snapshotCurrentGame(){
   return { players:[...players], numPlayers, scores:[...scores], hole,
     history:JSON.parse(JSON.stringify(history)), showHist, hChoice, hResult,
-    currentRound, roundName, maxRounds };
+    currentRound, roundName, maxRounds, playForMoney, betPerPoint };
 }
 
 function restoreCurrentGame(g){
@@ -502,6 +636,8 @@ function restoreCurrentGame(g){
   currentRound = g.currentRound || 1;
   roundName    = g.roundName || `Runde ${currentRound}`;
   maxRounds    = g.maxRounds || tournament.maxRounds || 1;
+  playForMoney = g.playForMoney || false;
+  betPerPoint  = g.betPerPoint  || 1;
   document.getElementById('hist-area').style.display = history.length ? 'block' : 'none';
   document.getElementById('hist-count').textContent = history.length;
   renderHistList();
@@ -617,6 +753,8 @@ function startGame(){
   players      = inputNames;
   numPlayers   = setupNumPlayers;
   maxRounds    = setupMaxRounds;
+  playForMoney = setupPlayForMoney;
+  betPerPoint  = setupBetPerPoint;
   scores       = new Array(numPlayers).fill(0);
   hole         = 1;
   history      = [];
@@ -845,8 +983,16 @@ function showFinish(){
   const ord = players.map((_,i)=>i).sort((a,b)=>scores[b]-scores[a]);
   document.getElementById('finish-scores').innerHTML = ord.map((i,r) => {
     const pts = scores[i];
-    return `<div class="finish-row ${r===0?'winner':''}"><div>${r===0?'🏆 ':''}${players[i]}</div><div class="finish-row-pts" style="color:${pts>0?'var(--green)':'var(--muted)'}">${pts>0?'+':''}${pts}</div></div>`;
+    const moneyStr = playForMoney ? ` ($${pts>=0?'+':''}${(pts*betPerPoint).toFixed(0)})` : '';
+    return `<div class="finish-row ${r===0?'winner':''}"><div>${r===0?'🏆 ':''}${players[i]}</div><div class="finish-row-pts" style="color:${pts>0?'var(--green)':'var(--muted)'}">${pts>0?'+':''}${pts}${moneyStr}</div></div>`;
   }).join('');
+
+  // Show settlement button if playing for money
+  const sb = document.getElementById('finish-settlement-btn');
+  if(sb) sb.innerHTML = playForMoney
+    ? '<button class="btn-primary" style="background:var(--green);color:#fff" onclick="showSettlement()">💰 Show settlement</button>'
+    : '';
+
   showScreen('finish');
 }
 
