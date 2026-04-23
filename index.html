@@ -917,7 +917,7 @@ function confirmHole(){
   document.getElementById('hist-area').style.display = 'block';
   document.getElementById('hist-count').textContent = history.length;
   renderHistList();
-  if(nofigator.vibrate) nofigator.vibrate(25);
+  if(navigator.vibrate) navigator.vibrate(25);
 
   if(hole > 18){ if(typeof gtag !== 'undefined') gtag('event', 'complete_round', {round_number: currentRound, num_players: numPlayers}); finalizeRound(); return; }
   sofeTournament();
