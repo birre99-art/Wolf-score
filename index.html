@@ -1384,105 +1384,23 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-async function shareCanvasImage(canvas, filename, fallback){
+async function shareCanvasImage(canvas,filename,fallback){
   try{
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
     if(!blob){ showToast('Could not generate image'); return; }
-    const file = new File([blob], filename, {type:'image/png'});
-    // Try native share with image - opens share sheet on all platforms
-    if(navigator.share){
-      try{
-        await navigator.share({files:[file], title:'Wolf Score'});
-        return;
-      } catch(e){
-        if(e.name === 'AbortError') return;
-        // Not supported with files, try without
-        try{
-          await navigator.share({title:'Wolf Score', text: fallback || ''});
-          return;
-        } catch(e2){
-          if(e2.name === 'AbortError') return;
-        }
-      }
+    const file=new File([blob],filename,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Wolf Score'}); return;
     }
-    // Fallback: download image
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=filename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
     showToast('Image downloaded 📥');
-  } catch(err){
-    if(err.name === 'AbortError') return;
-    showToast('Could not share — try downloading instead');
-  }
-}
-
-let pendingCanvas = null;
-let pendingFilename = null;
-let pendingText = null;
-
-function showShareModal(canvas, filename, text){
-  pendingCanvas = canvas;
-  pendingFilename = filename;
-  pendingText = text;
-  
-  const content = document.getElementById('share-modal-content');
-  content.innerHTML = `
-    <div class="share-modal-btn" onclick="shareAsImage()">
-      <span class="share-modal-icon">🖼️</span>
-      <div><div>Share as image</div><div style="font-size:11px;color:var(--muted)">Opens share sheet with graphic</div></div>
-    </div>
-    <div class="share-modal-btn" onclick="shareAsText()">
-      <span class="share-modal-icon">💬</span>
-      <div><div>Share via WhatsApp</div><div style="font-size:11px;color:var(--muted)">Text summary</div></div>
-    </div>
-    <div class="share-modal-btn" onclick="downloadImage()">
-      <span class="share-modal-icon">📥</span>
-      <div><div>Download image</div><div style="font-size:11px;color:var(--muted)">Save to device</div></div>
-    </div>`;
-  document.getElementById('share-modal').style.display = 'flex';
-}
-
-function closeShareModal(){
-  document.getElementById('share-modal').style.display = 'none';
-  pendingCanvas = null; pendingFilename = null; pendingText = null;
-}
-
-async function shareAsImage(){
-  closeShareModal();
-  if(!pendingCanvas) return;
-  const blob = await new Promise(res => pendingCanvas.toBlob(res, 'image/png'));
-  const file = new File([blob], pendingFilename, {type:'image/png'});
-  try {
-    await navigator.share({files:[file], title:'Wolf Score'});
-  } catch(e){
-    if(e.name !== 'AbortError') shareAsText();
-  }
-}
-
-function shareAsText(){
-  closeShareModal();
-  if(pendingText) window.open(`https://wa.me/?text=${encodeURIComponent(pendingText)}`, '_blank');
-}
-
-async function downloadImage(){
-  closeShareModal();
-  if(!pendingCanvas) return;
-  const blob = await new Promise(res => pendingCanvas.toBlob(res, 'image/png'));
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = pendingFilename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  showToast('Image downloaded 📥');
-}
-
-function fallbackShare(text){
-  if(text){
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  } else {
-    showToast('Could not share');
+  }catch(err){
+    if(err.name==='AbortError') return;
+    if(fallback){ try{await navigator.clipboard.writeText(fallback);showToast('Text copied ✓');}catch(e){showToast('Could not share — image downloaded instead');} }
   }
 }
 
@@ -1491,21 +1409,18 @@ async function shareTournamentGraphic(){
   if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('No data to share yet'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf', subtitle:`${tournament.rounds.length} of ${mr} rounds spilt`,
+    title:'Wolf Score', subtitle:`${tournament.rounds.length} of ${mr} rounds played`,
     rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
-  }),'wolf-turnering.png',buildSummaryText());
+  }),'wolf-tournament.png',buildSummaryText());
 }
 
 async function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
-  const sorted = players.map((name,i) => ({name, score:scores[i]})).sort((a,b) => b.score-a.score);
-  const canvas = renderShareCanvas({
-    title: roundName,
-    subtitle: `Hole ${Math.min(hole,18)} of 18 — Live`,
-    rows: sorted,
-    meta: 'Wolf Score'
-  });
-  await shareCanvasImage(canvas, 'wolf-live.png', buildSummaryText());
+  const sorted=players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
+  await shareCanvasImage(renderShareCanvas({
+    title:roundName, subtitle:`Hole ${Math.min(hole,18)} of 18 — Live`,
+    rows:sorted, meta:'Wolf Score'
+  }),'wolf-live.png',buildSummaryText());
 }
 
 async function shareChampionGraphic(){
@@ -1513,33 +1428,8 @@ async function shareChampionGraphic(){
   if(!totals.length){ showToast('No champion data'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf Champion', subtitle:`${mr} rounds spilt`,
+    title:'Wolf Champion', subtitle:`${mr} rounds played`,
     highlight:{name:totals[0].name,score:totals[0].total},
     rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
   }),'wolf-champion.png',buildSummaryText());
 }
-
-/* ── Init ── */
-window.onload = function(){
-  loadTournament();
-  if(tournament.currentGame){
-    numPlayers = tournament.currentGame.numPlayers || tournament.currentGame.players.length;
-    maxRounds  = tournament.currentGame.maxRounds  || tournament.maxRounds || 1;
-    restoreCurrentGame(tournament.currentGame);
-    showScreen('game'); render(); return;
-  }
-  const np = tournament.numPlayers || 3;
-  const mr = tournament.maxRounds  || 1;
-  setupNumPlayers = np;
-  setupMaxRounds  = mr;
-  // Set up new-tournament fields in case they are shown
-  setPlayerCount(np);
-  document.getElementById('maxRoundsDisplay').textContent = mr;
-  ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||`Player ${i+1}`; });
-  // updateResetButton decides active vs new mode
-  updateResetButton();
-  showScreen('setup');
-};
-</script>
-</body>
-</html>
