@@ -396,15 +396,15 @@ button,input{font-family:'DM Mono',monospace}
     <div class="rules-section-title">How the Honor chooses</div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🔴</div>
-      <div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>før</strong> styreren selv slår. Går solo vs alle.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>before</strong> the Honor tees off. Goes solo vs all.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟡</div>
-      <div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Declared <strong>etter</strong> eget utslag, men før de andre slår. Går solo vs alle.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Declared <strong>after</strong> own tee shot, but before others hit. Goes solo vs all.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">⚪</div>
-      <div class="rules-type-body"><div class="rules-type-name">Honor</div><div class="rules-type-desc">Wolfen har ikke valgt partner innen alle andre har slått — går automatisk solo.</div></div>
+      <div class="rules-type-body"><div class="rules-type-name">Honor</div><div class="rules-type-desc">The Honor has not chosen a partner before all others hit — automatically goes solo.</div></div>
     </div>
     <div class="rules-type-row">
       <div class="rules-type-icon">🟢</div>
@@ -419,7 +419,7 @@ button,input{font-family:'DM Mono',monospace}
       <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
       <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
       <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
-      <div class="rules-pts-label">Vsstandere wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Opponentse wins</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-label">Partner play wins</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
       <div class="rules-pts-divider"></div>
@@ -427,7 +427,7 @@ button,input{font-family:'DM Mono',monospace}
       <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
       <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
       <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Vsstandere wins</div><div class="rules-pts-val">+1p each</div>
+      <div class="rules-pts-label">Opponentse wins</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-label">Partner 2v2 wins</div><div class="rules-pts-val">+1p each</div>
       <div class="rules-pts-label">Delt holes</div><div class="rules-pts-val">0p</div>
     </div>
@@ -1391,10 +1391,10 @@ async function shareTournamentGraphic(){
 }
 
 async function shareLiveGraphic(){
-  if(!isGameInProgress()||!players.length){ showToast('Ingen aktiv round å dele'); return; }
+  if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
   const sorted=players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
   await shareCanvasImage(renderShareCanvas({
-    title:roundName, subtitle:`Hole ${Math.min(hole,18)} of 18 — Live`,
+    title:roundName, subtitle:`Holee ${Math.min(hole,18)} of 18 — Live`,
     rows:sorted, meta:'Wolf · Wolf Score'
   }),'wolf-live.png',buildSummaryText());
 }
