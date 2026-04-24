@@ -357,9 +357,9 @@ button,input{font-family:'DM Mono',monospace}
     <div class="finish-sub" id="t-finish-sub">Total score</div>
   </div>
   <div class="summary-card highlight" id="t-summary-card"></div>
-  <div class="section-title">Sammenlagt</div>
+  <div class="section-title">Standings</div>
   <div class="summary-list" id="t-summary-list"></div>
-  <div class="section-title">Historiske rounds</div>
+  <div class="section-title">Round history</div>
   <div class="round-list" id="t-round-list"></div>
   <button class="btn-primary" onclick="resumeCurrentOrSetup()">Back to app</button>
   <div id="tournament-settlement-btn"></div>
@@ -532,8 +532,6 @@ function fmtMoney(v){
 function setSettlementType(type){
   setupSettlementType = type;
   settlementType = type;
-  document.getElementById('settle-split').classList.toggle('active', type === 'split');
-  document.getElementById('settle-winner').classList.toggle('active', type === 'winner');
 }
 
 function setBetting(val){
@@ -1277,7 +1275,7 @@ function renderTournament(){
       <div>
         <div class="summary-label">Status</div>
         <div>${completed} of ${mr} rounds complete</div>
-        <div class="summary-meta">${remaining>0?`${remaining} rounds gjenstår`:'Tournament complete'}</div>
+        <div class="summary-meta">${remaining>0?`${remaining} rounds remaining`:'Tournament complete'}</div>
       </div>
       <div style="text-align:right">
         <div class="summary-label">Leader</div>
@@ -1448,7 +1446,7 @@ function renderShareCanvas(config){
   let y=PAD;
   ctx.fillStyle='#888880'; ctx.font='500 24px "DM Mono",monospace';
   ctx.textAlign='center';
-  ctx.fillText('GENTLEMEN OF BELEK',W/2,y+30); y+=50;
+  ctx.fillText('WOLF SCORE',W/2,y+30); y+=50;
   ctx.fillStyle='#c9a84c'; ctx.font='78px "DM Serif Display",serif';
   ctx.fillText(config.title,W/2,y+80); y+=100;
   if(config.subtitle){
