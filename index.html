@@ -302,8 +302,7 @@ button,input{font-family:'DM Mono',monospace}
       </div>
     </div>
     <div class="rules-box" id="rules-box"></div>
-    <button class="btn-primary" onclick="startGame()">Start tournament</button>
-    <button class="btn-secondary" onclick="quickStart()">⚡ Quick start (3 players)</button>
+    <button class="btn-primary" onclick="startGame()">on>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Rules</button>
     <div class="helper-text">Scores are saved automatically between rounds and days.</div>
   </div>
@@ -1585,23 +1584,7 @@ async function shareChampionGraphic(){
   }),'wolf-champion.png',buildSummaryText());
 }
 
-function quickStart(){
-  setupNumPlayers = 3;
-  setPlayerCount(3);
-  document.getElementById('p1').value = 'Player 1';
-  document.getElementById('p2').value = 'Player 2';
-  document.getElementById('p3').value = 'Player 3';
-  startGame();
-}
-
-window.onload = function(){
-  loadTournament();
-
-  playForMoney = tournament.playForMoney || false;
-  betPerPoint = tournament.betPerPoint || 1;
-  settlementType = tournament.settlementType || 'winner';
-  setupPlayForMoney = playForMoney;
-  setupBetPerPoint = betPerPoint;
+int;
   setupSettlementType = settlementType;
 
   setBetting(setupPlayForMoney);
