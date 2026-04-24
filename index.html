@@ -302,7 +302,7 @@ button,input{font-family:'DM Mono',monospace}
       </div>
     </div>
     <div class="rules-box" id="rules-box"></div>
-    <button class="btn-primary" onclick="startGame()">on>
+    <button class="btn-primary" onclick="startGame()">Start game</button>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Rules</button>
     <div class="helper-text">Scores are saved automatically between rounds and days.</div>
   </div>
@@ -1584,29 +1584,58 @@ async function shareChampionGraphic(){
   }),'wolf-champion.png',buildSummaryText());
 }
 
-int;
-  setupSettlementType = settlementType;
+window.onload = function(){
+  try{
+    loadTournament();
 
-  setBetting(setupPlayForMoney);
-  setSettlementType(setupSettlementType);
-  setBetAmount(setupBetPerPoint);
+    playForMoney = tournament.playForMoney || false;
+    betPerPoint = tournament.betPerPoint || 1;
+    settlementType = tournament.settlementType || 'winner';
+    setupPlayForMoney = playForMoney;
+    setupBetPerPoint = betPerPoint;
+    setupSettlementType = settlementType;
 
-  if(tournament.currentGame){
-    restoreCurrentGame(tournament.currentGame);
-    showScreen('game');
-    render();
-    return;
+    setBetting(setupPlayForMoney);
+    setSettlementType(setupSettlementType);
+    setBetAmount(setupBetPerPoint);
+
+    if(tournament.currentGame){
+      restoreCurrentGame(tournament.currentGame);
+      showScreen('game');
+      render();
+      return;
+    }
+
+    const np = tournament.numPlayers || 3;
+    const mr = tournament.maxRounds || 1;
+    setupNumPlayers = np;
+    setupMaxRounds = mr;
+    setPlayerCount(np);
+    document.getElementById('maxRoundsDisplay').textContent = mr;
+    ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||''; });
+    updateResetButton();
+    showScreen('setup');
+  }catch(err){
+    console.error('Wolf init failed:', err);
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+      tournament = defaultTournament();
+      players=[]; scores=[]; moneyBalances=[]; hole=1; history=[];
+      setupNumPlayers=3; setupMaxRounds=1;
+      playForMoney=false; betPerPoint=1; settlementType='winner';
+      setupPlayForMoney=false; setupBetPerPoint=1; setupSettlementType='winner';
+      setPlayerCount(3);
+      document.getElementById('maxRoundsDisplay').textContent = 1;
+      setBetting(false);
+      setBetAmount(1);
+      updateResetButton();
+      showScreen('setup');
+      showToast('Saved game was reset after an error');
+    }catch(e){
+      console.error('Wolf fallback failed:', e);
+      alert('Wolf failed to start. Clear browser data for this site and reload.');
+    }
   }
-
-  const np = tournament.numPlayers || 3;
-  const mr = tournament.maxRounds || 1;
-  setupNumPlayers = np;
-  setupMaxRounds = mr;
-  setPlayerCount(np);
-  document.getElementById('maxRoundsDisplay').textContent = mr;
-  ['p1','p2','p3','p4'].forEach((id,i) => { document.getElementById(id).value = tournament.players[i]||''; });
-  updateResetButton();
-  showScreen('setup');
 };
 </script>
 </body>
