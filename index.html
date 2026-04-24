@@ -303,6 +303,7 @@ button,input{font-family:'DM Mono',monospace}
     </div>
     <div class="rules-box" id="rules-box"></div>
     <button class="btn-primary" onclick="startGame()">Start tournament</button>
+    <button class="btn-secondary" onclick="quickStart()">⚡ Quick start (3 players)</button>
     <button class="btn-secondary" onclick="showScreen('rules')">📖 Rules</button>
     <div class="helper-text">Scores are saved automatically between rounds and days.</div>
   </div>
@@ -1477,9 +1478,11 @@ function renderShareCanvas(config){
     ctx.fillStyle='#f0ece4'; ctx.font='500 30px "DM Mono",monospace';
     ctx.textAlign='left';
     ctx.fillText(`${idx===0?'🏆 ':''}${row.name}`,pX+32,rY+48);
-    ctx.fillStyle=row.score>0?'#4a9e6b':'#888880';
+    const val = row.value !== undefined ? row.value : fmtScore(row.score || 0);
+    const num = row.valueNum !== undefined ? row.valueNum : (row.score || 0);
+    ctx.fillStyle=num>0?'#4a9e6b':num<0?'#c45a5a':'#888880';
     ctx.font='500 30px "DM Mono",monospace'; ctx.textAlign='right';
-    ctx.fillText(fmtScore(row.score),pX+pW-32,rY+48);
+    ctx.fillText(val,pX+pW-32,rY+48);
     rY+=rowH;
   });
   if(config.meta){
@@ -1542,18 +1545,27 @@ async function shareTournamentGraphic(){
   const totals=computeTotals();
   if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('No data to share yet'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
+  const rows = playForMoney
+    ? [...totals].sort((a,b)=>b.cash-a.cash).map(p=>({name:p.name,value:fmtMoney(p.cash),valueNum:p.cash}))
+    : totals.map(p=>({name:p.name,score:p.total}));
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf Score', subtitle:`${tournament.rounds.length} of ${mr} rounds played`,
-    rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
+    title: playForMoney ? 'Wolf Cash' : 'Wolf Score',
+    subtitle:`${tournament.rounds.length} of ${mr} rounds played`,
+    rows,
+    meta:'Wolf Score'
   }),'wolf-tournament.png',buildSummaryText());
 }
 
 async function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round to share'); return; }
-  const sorted=players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
+  const sorted = playForMoney
+    ? players.map((name,i)=>({name,value:fmtMoney(moneyBalances[i] || 0),valueNum:moneyBalances[i] || 0})).sort((a,b)=>b.valueNum-a.valueNum)
+    : players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
   await shareCanvasImage(renderShareCanvas({
-    title:roundName, subtitle:`Hole ${Math.min(hole,18)} of 18 — Live`,
-    rows:sorted, meta:'Wolf Score'
+    title:roundName,
+    subtitle:`Hole ${Math.min(hole,18)} of 18 — ${playForMoney ? 'Cash live' : 'Live'}`,
+    rows:sorted,
+    meta:'Wolf Score'
   }),'wolf-live.png',buildSummaryText());
 }
 
@@ -1561,11 +1573,25 @@ async function shareChampionGraphic(){
   const totals=computeTotals();
   if(!totals.length){ showToast('No champion data'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
+  const sorted = playForMoney ? [...totals].sort((a,b)=>b.cash-a.cash) : totals;
   await shareCanvasImage(renderShareCanvas({
-    title:'Wolf Champion', subtitle:`${mr} rounds played`,
-    highlight:{name:totals[0].name,score:totals[0].total},
-    rows:totals.map(p=>({name:p.name,score:p.total})), meta:'Wolf Score'
+    title: playForMoney ? 'Wolf Cash Winner' : 'Wolf Champion',
+    subtitle:`${mr} rounds played`,
+    highlight:{name:sorted[0].name,score: playForMoney ? sorted[0].cash : sorted[0].total},
+    rows: playForMoney
+      ? sorted.map(p=>({name:p.name,value:fmtMoney(p.cash),valueNum:p.cash}))
+      : sorted.map(p=>({name:p.name,score:p.total})),
+    meta:'Wolf Score'
   }),'wolf-champion.png',buildSummaryText());
+}
+
+function quickStart(){
+  setupNumPlayers = 3;
+  setPlayerCount(3);
+  document.getElementById('p1').value = 'Player 1';
+  document.getElementById('p2').value = 'Player 2';
+  document.getElementById('p3').value = 'Player 3';
+  startGame();
 }
 
 window.onload = function(){
