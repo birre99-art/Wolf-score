@@ -14,6 +14,7 @@
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 try { gtag('js', new Date()); gtag('config', 'G-QEZ0KNHP0J'); } catch(e) { console.warn('GA failed', e); }
+function ga(event, params){ try{ if(typeof gtag!=='undefined') gtag('event', event, params||{}); }catch(e){} }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
@@ -739,7 +740,7 @@ function startGame(){
   tournament.setupCarryPot=setupCarryPot;
   saveTournament();
   showScreen('game');
-  if(typeof gtag!=='undefined') gtag('event','start_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles});
+  ga('start_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney,bet_per_point:betPerPoint,carry_pot:setupCarryPot});
   render();
 }
 
@@ -759,6 +760,7 @@ function quickRematch(){
   tournament.playForMoney=playForMoney; tournament.betPerPoint=betPerPoint;
   tournament.setupCarryPot=setupCarryPot; tournament.settlementType=settlementType;
   saveTournament();
+  ga('quick_rematch',{num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney});
   showScreen('game');
   render();
   showToast('New game — same crew! 🐺');
@@ -839,7 +841,12 @@ function renderChoices(){
     ${hResult?`<button class="confirm-btn" onclick="confirmHole()">Confirm hole ${hole}</button>`:''}`;
 }
 
-function pick(c){ hChoice=c; hResult=null; saveTournament(); render(); }
+function pick(c){
+  hChoice=c; hResult=null;
+  const type=c.startsWith('partner:')?'partner':c;
+  ga('pick_wolf_type',{type, hole, num_players:numPlayers});
+  saveTournament(); render();
+}
 function setRes(r){ hResult=r; saveTournament(); render(); }
 
 function calcHoleMoneyChanges(changes, info, resultType){
@@ -892,6 +899,7 @@ function confirmHole(){
     info.partnerSide.forEach(i=>{ changes[i]=1; }); desc=`${ol} wins (+1p each)`;
   } else { desc='Tied'; }
 
+  ga('hole_result',{hole,wolf_type:hChoice?.startsWith('partner:')?'partner':hChoice,result:hResult,num_players:numPlayers,round:currentRound});
   const cpBefore=carryPot;
   const moneyChanges=calcHoleMoneyChanges(changes,info,hResult);
   scores=scores.map((s,i)=>s+changes[i]);
@@ -911,7 +919,7 @@ function confirmHole(){
   if(navigator.vibrate) navigator.vibrate(25);
 
   if(hole>maxHoles){
-    if(typeof gtag!=='undefined') gtag('event','complete_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles});
+    ga('complete_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney,holes_played:history.length});
     finalizeRound(); return;
   }
   saveTournament(); render();
@@ -919,6 +927,7 @@ function confirmHole(){
 
 function undoHole(){
   if(!history.length) return;
+  ga('undo_hole',{hole,round:currentRound});
   const last=history.pop();
   scores=scores.map((s,i)=>s-last.changes[i]);
   moneyBalances=moneyBalances.map((m,i)=>roundMoney(m-(last.moneyChanges?.[i]||0)));
@@ -969,12 +978,12 @@ function renderSettlementList(playerNames, balances, listEl){
   listEl.innerHTML=tx.length===0?'<div class="settlement-even">🤝 Everyone is even!</div>':tx.map(t=>`<div class="settlement-row"><div class="settlement-from">${t.from} pays</div><div class="settlement-amount">$${Number.isInteger(t.amount)?t.amount.toFixed(0):t.amount.toFixed(2)}</div><div class="settlement-arrow">↓</div><div class="settlement-to">${t.to}</div></div>`).join('');
 }
 
-function showTournamentSettlement(){
+function showTournamentSettlement(){ ga('view_settlement',{scope:'tournament'});
   const tp=tournament.players.length?tournament.players:players;
   const tb=tp.map(name=>{ let t=0; tournament.rounds.forEach(r=>{ const ri=r.players.indexOf(name); if(ri>=0) t+=r.moneyBalances?.[ri]||0; }); return roundMoney(t); });
   renderSettlementList(tp,tb,document.getElementById('settlement-list')); showScreen('settlement');
 }
-function showSettlement(){ renderSettlementList(players,moneyBalances,document.getElementById('settlement-list')); showScreen('settlement'); }
+function showSettlement(){ ga('view_settlement',{scope:'round'}); renderSettlementList(players,moneyBalances,document.getElementById('settlement-list')); showScreen('settlement'); }
 
 function showFinish(){
   const ord=players.map((_,i)=>i).sort((a,b)=>playForMoney?moneyBalances[b]-moneyBalances[a]:scores[b]-scores[a]);
@@ -1086,7 +1095,7 @@ function buildSummaryText(){
   return lines.join('\n');
 }
 
-function shareWhatsAppSummary(){ window.open(`https://wa.me/?text=${encodeURIComponent(buildSummaryText())}`,'_blank'); }
+function shareWhatsAppSummary(){ ga('share',{method:'whatsapp'}); window.open(`https://wa.me/?text=${encodeURIComponent(buildSummaryText())}`,'_blank'); }
 
 function renderShareCanvas(config){
   const W=1080,PAD=72,canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
@@ -1138,6 +1147,7 @@ async function shareCanvasImage(canvas,filename,fallback){
 }
 
 async function shareTournamentGraphic(){
+  ga('share',{method:'tournament_graphic'});
   const totals=computeTotals(); if(!totals.length||(totals.every(p=>p.rounds===0)&&!isGameInProgress())){ showToast('No data yet'); return; }
   const mr=tournament.maxRounds||maxRounds||1;
   const rows=playForMoney?[...totals].sort((a,b)=>b.cash-a.cash).map(p=>({name:p.name,value:fmtMoney(p.cash),valueNum:p.cash})):totals.map(p=>({name:p.name,score:p.total}));
@@ -1145,10 +1155,12 @@ async function shareTournamentGraphic(){
 }
 async function shareLiveGraphic(){
   if(!isGameInProgress()||!players.length){ showToast('No active round'); return; }
+  ga('share',{method:'live_graphic',hole,num_players:numPlayers});
   const sorted=playForMoney?players.map((name,i)=>({name,value:fmtMoney(moneyBalances[i]||0),valueNum:moneyBalances[i]||0})).sort((a,b)=>b.valueNum-a.valueNum):players.map((name,i)=>({name,score:scores[i]})).sort((a,b)=>b.score-a.score);
   await shareCanvasImage(renderShareCanvas({title:roundName,subtitle:`Hole ${Math.min(hole,maxHoles)} of ${maxHoles}`,rows:sorted,meta:'Wolf Score'}),'wolf-live.png',buildSummaryText());
 }
 async function shareChampionGraphic(){
+  ga('share',{method:'champion_graphic'});
   const totals=computeTotals(); if(!totals.length){ showToast('No champion data'); return; }
   const mr=tournament.maxRounds||maxRounds||1, sorted=playForMoney?[...totals].sort((a,b)=>b.cash-a.cash):totals;
   await shareCanvasImage(renderShareCanvas({title:playForMoney?'Wolf Cash Winner':'Wolf Champion',subtitle:`${mr} rounds played`,highlight:{name:sorted[0].name,score:playForMoney?sorted[0].cash:sorted[0].total},rows:playForMoney?sorted.map(p=>({name:p.name,value:fmtMoney(p.cash),valueNum:p.cash})):sorted.map(p=>({name:p.name,score:p.total})),meta:'Wolf Score'}),'wolf-champion.png',buildSummaryText());
