@@ -378,48 +378,25 @@ button,input{font-family:'DM Mono',monospace}
 </div>
 
 <div id="rules" class="screen">
-  <div><div class="rules-screen-title">🐺 Regler</div><div class="rules-screen-sub">Wolf Score · Wolf</div></div>
+  <div><div class="rules-screen-title">🐺 Rules</div><div class="rules-screen-sub">Wolf Score · Wolf</div></div>
+
   <div class="rules-section">
     <div class="rules-section-title">Before you start</div>
     <div class="rules-text">
-      The order is the one you enter before hole 1 and is fixed for the entire round.<br><br>
-      The player who is <strong>first in the order has the Honor</strong> on hole 1, then it rotates hole by hole.<br><br>
+      The playing order is set before hole 1 and is <strong>fixed for the entire round</strong>. The player first in the order has the Honor on hole 1, then it rotates hole by hole.<br><br>
       Most points after all holes wins. On a tied hole, <strong>no points</strong> are awarded.<br><br>
-      <strong>Wolf tees first (default):</strong> Wolf tees off first and can declare Blind Wolf, Lone Wolf, or choose a partner after each shot.<br><br>
-      <strong>Wolf tees last:</strong> The other players tee off first. Wolf sees all shots before deciding — solo or partner. Lone Wolf is not available in this mode.<br><br>
       <strong>4 players — last 2 holes:</strong> The player with <strong>fewest points</strong> has the Honor. Ties are broken by rotation order.
     </div>
   </div>
-  <div class="rules-section">
-    <div class="rules-section-title">How the Honor chooses</div>
-    <div class="rules-type-row"><div class="rules-type-icon">🔴</div><div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>before</strong> the Honor tees off. Goes solo vs all.</div></div></div>
-    <div class="rules-type-row"><div class="rules-type-icon">🟡</div><div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Declared <strong>after</strong> own tee shot, but before others hit. Goes solo vs all.</div></div></div>
-    <div class="rules-type-row"><div class="rules-type-icon">⚪</div><div class="rules-type-body"><div class="rules-type-name">Honor</div><div class="rules-type-desc">Has not chosen before all others hit — automatically goes solo.</div></div></div>
-    <div class="rules-type-row"><div class="rules-type-icon">🟢</div><div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Choose a partner <strong>immediately after they hit</strong>. The remaining player automatically becomes the <strong>Wolf</strong>.</div></div></div>
+
+  <div class="rules-section" id="rules-tee-order-section">
+    <!-- Filled dynamically by renderRulesScreen() -->
   </div>
+
   <div class="rules-section" id="rules-dynamic-section">
-    <div class="rules-section-title">Scoring</div>
-    <div class="rules-pts-grid">
-      <div class="rules-pts-section-label">3 players — solo Wolf</div>
-      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
-      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+2p</div>
-      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-section-label">3 players — partner play</div>
-      <div class="rules-pts-label">Lone player wins</div><div class="rules-pts-val">+2p</div>
-      <div class="rules-pts-label">Partner side wins</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
-      <div class="rules-pts-divider"></div>
-      <div class="rules-pts-section-label">4 players — solo Wolf</div>
-      <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
-      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
-      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
-      <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-section-label">4 players — 2v2 partner play</div>
-      <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
-      <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
-    </div>
+    <!-- Filled dynamically by renderRulesScreen() -->
   </div>
+
   <button class="btn-primary" onclick="goSetup()">Back</button>
 </div>
 
@@ -581,25 +558,48 @@ function buildRulesHTML(n, forMoney, betAmt, carryOn, goesLast){
 function renderRulesBox(){ const b=document.getElementById('rules-box'); if(b) b.innerHTML=buildRulesHTML(setupNumPlayers,setupPlayForMoney,setupBetPerPoint,setupCarryPot,setupWolfGoesLast); }
 
 function renderRulesScreen(){
-  const n=setupNumPlayers||tournament.numPlayers||3;
-  const sec=document.getElementById('rules-dynamic-section');
+  const n = setupNumPlayers||tournament.numPlayers||3;
+  const gl = wolfGoesLast||setupWolfGoesLast||tournament.wolfGoesLast||false;
+  const fm = playForMoney||setupPlayForMoney;
+
+  /* ── Tee order section ── */
+  const teeSection = document.getElementById('rules-tee-order-section');
+  if(teeSection){
+    teeSection.innerHTML = `
+      <div class="rules-section-title">Wolf tees first ${!gl?'✓':''}</div>
+      <div class="rules-text">The Wolf tees off first. After each player hits, the Wolf can choose them as a partner — but must decide <strong>immediately</strong>, before the next player tees off. If no partner is chosen after all have hit, the Wolf automatically goes solo.</div>
+      <div class="rules-type-row"><div class="rules-type-icon">🔴</div><div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>before anyone tees off</strong>. Highest reward, highest risk.</div></div></div>
+      <div class="rules-type-row"><div class="rules-type-icon">🟡</div><div class="rules-type-body"><div class="rules-type-name">Lone Wolf</div><div class="rules-type-desc">Declared <strong>after the Wolf's own tee shot</strong>, but before others hit. Goes solo vs all.</div></div></div>
+      <div class="rules-type-row"><div class="rules-type-icon">🟢</div><div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Wolf chooses a partner <strong>immediately after they hit</strong>. Remaining player becomes the lone opponent.</div></div></div>
+      <div class="rules-type-row"><div class="rules-type-icon">⚪</div><div class="rules-type-body"><div class="rules-type-name">Auto solo</div><div class="rules-type-desc">Wolf didn't choose anyone — <strong>automatically goes solo</strong> after all have hit.</div></div></div>
+      <div style="height:16px"></div>
+      <div class="rules-section-title" style="margin-top:4px">Wolf tees last ${gl?'✓':''}</div>
+      <div class="rules-text">The other players tee off first. The Wolf watches <strong>all tee shots</strong> before deciding — go solo or pick a partner.</div>
+      <div class="rules-type-row"><div class="rules-type-icon">🔴</div><div class="rules-type-body"><div class="rules-type-name">Blind Wolf</div><div class="rules-type-desc">Declared <strong>before anyone tees off</strong>, including the Wolf. Highest reward.</div></div></div>
+      <div class="rules-type-row"><div class="rules-type-icon">🟢</div><div class="rules-type-body"><div class="rules-type-name">Partner</div><div class="rules-type-desc">Wolf picks a partner after seeing all tee shots.</div></div></div>
+      <div class="rules-type-row"><div class="rules-type-icon">⚪</div><div class="rules-type-body"><div class="rules-type-name">Solo Wolf</div><div class="rules-type-desc">Wolf goes alone after seeing all tee shots. <em>Lone Wolf not available in this mode.</em></div></div></div>`;
+  }
+
+  /* ── Scoring section ── */
+  const sec = document.getElementById('rules-dynamic-section');
   if(!sec) return;
-  const fm=playForMoney||setupPlayForMoney;
+
   if(fm){
     sec.innerHTML=`<div class="rules-section-title">Money rules</div><div class="rules-pts-grid">
       <div class="rules-pts-section-label">${n} players — solo Wolf wins</div>
       <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">${n===4?'5x':'4x'} stake from each</div>
-      <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">${n===4?'4x':'3x'} stake from each</div>
-      <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">${n===4?'3x':'2x'} stake from each</div>
+      ${gl?'':` <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">${n===4?'4x':'3x'} stake from each</div>`}
+      <div class="rules-pts-label">${gl?'Solo Wolf wins':'Wolf wins'}</div><div class="rules-pts-val">${n===4?'3x':'2x'} stake from each</div>
       <div class="rules-pts-label">Solo Wolf loses</div><div class="rules-pts-val">1x stake to each opponent</div>
       <div class="rules-pts-divider"></div>
-      <div class="rules-pts-section-label">${n===3?'3 players — partner chosen':'4 players — partner play'}</div>
+      <div class="rules-pts-section-label">${n===3?'3 players — partner play':'4 players — partner play'}</div>
       <div class="rules-pts-label">${n===3?'Lone player wins':'Winning side'}</div><div class="rules-pts-val">${n===3?'2x stake total':'1x stake each'}</div>
       <div class="rules-pts-label">${n===3?'Lone player loses':'Losing side'}</div><div class="rules-pts-val">${n===3?'-2x stake total':'-1x stake each'}</div>
       <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">${setupCarryPot?`carry ${fmtMoney(setupBetPerPoint*n)}`:'$0'}</div>
     </div>`; return;
   }
-  sec.innerHTML=`<div class="rules-section-title">Scoring</div><div class="rules-pts-grid">
+
+  sec.innerHTML=`<div class="rules-section-title">Scoring — Wolf tees first</div><div class="rules-pts-grid">
     <div class="rules-pts-section-label">3 players — solo Wolf</div>
     <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
     <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+3p</div>
@@ -614,6 +614,25 @@ function renderRulesScreen(){
     <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
     <div class="rules-pts-label">Lone Wolf wins</div><div class="rules-pts-val">+4p</div>
     <div class="rules-pts-label">Wolf wins</div><div class="rules-pts-val">+3p</div>
+    <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+    <div class="rules-pts-section-label">4 players — 2v2 partner play</div>
+    <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
+    <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
+  </div>
+  <div style="height:1px;background:var(--border);margin:16px 0"></div>
+  <div class="rules-section-title">Scoring — Wolf tees last</div><div class="rules-pts-grid">
+    <div class="rules-pts-section-label">3 players — solo Wolf</div>
+    <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+4p</div>
+    <div class="rules-pts-label">Solo Wolf wins</div><div class="rules-pts-val">+2p</div>
+    <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
+    <div class="rules-pts-section-label">3 players — partner play</div>
+    <div class="rules-pts-label">Lone player wins</div><div class="rules-pts-val">+2p</div>
+    <div class="rules-pts-label">Partner side wins</div><div class="rules-pts-val">+1p each</div>
+    <div class="rules-pts-label">Tied hole</div><div class="rules-pts-val">0p</div>
+    <div class="rules-pts-divider"></div>
+    <div class="rules-pts-section-label">4 players — solo Wolf</div>
+    <div class="rules-pts-label">Blind Wolf wins</div><div class="rules-pts-val">+5p</div>
+    <div class="rules-pts-label">Solo Wolf wins</div><div class="rules-pts-val">+3p</div>
     <div class="rules-pts-label">Opponents beat solo Wolf</div><div class="rules-pts-val">+1p each</div>
     <div class="rules-pts-section-label">4 players — 2v2 partner play</div>
     <div class="rules-pts-label">Winning side</div><div class="rules-pts-val">+1p each</div>
