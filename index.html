@@ -254,6 +254,14 @@ button,input{font-family:'DM Mono',monospace}
     </div>
 
     <div class="setup-card" style="width:100%;max-width:340px">
+      <div class="setup-label">Wolf tee order</div>
+      <div class="toggle-row">
+        <div class="count-btn active" id="btn-wolf-first" onclick="setWolfOrder(false)">🐺 Wolf tees first</div>
+        <div class="count-btn" id="btn-wolf-last" onclick="setWolfOrder(true)">🐺 Wolf tees last</div>
+      </div>
+    </div>
+
+    <div class="setup-card" style="width:100%;max-width:340px">
       <div class="setup-label">Player order hole 1</div>
       <!-- NEW: Saved player chips -->
       <div id="chips-section" class="chips-section" style="display:none">
@@ -376,7 +384,9 @@ button,input{font-family:'DM Mono',monospace}
     <div class="rules-text">
       The order is the one you enter before hole 1 and is fixed for the entire round.<br><br>
       The player who is <strong>first in the order has the Honor</strong> on hole 1, then it rotates hole by hole.<br><br>
-      The Honor tees off <strong>first</strong> on every hole. Most points after all holes wins. On a tied hole, <strong>no points</strong> are awarded.<br><br>
+      Most points after all holes wins. On a tied hole, <strong>no points</strong> are awarded.<br><br>
+      <strong>Wolf tees first (default):</strong> Wolf tees off first and can declare Blind Wolf, Lone Wolf, or choose a partner after each shot.<br><br>
+      <strong>Wolf tees last:</strong> The other players tee off first. Wolf sees all shots before deciding — solo or partner. Lone Wolf is not available in this mode.<br><br>
       <strong>4 players — last 2 holes:</strong> The player with <strong>fewest points</strong> has the Honor. Ties are broken by rotation order.
     </div>
   </div>
@@ -452,7 +462,8 @@ let players = [], numPlayers = 3, scores = [], moneyBalances = [];
 let hole = 1, history = [], showHist = false, hChoice = null, hResult = null;
 let currentRound = 1, roundName = 'Round 1', maxRounds = 1;
 let setupNumPlayers = 3, setupMaxRounds = 1;
-let maxHoles = 18, setupMaxHoles = 18;   /* NEW: hole count */
+let maxHoles = 18, setupMaxHoles = 18;   /* hole count */
+let wolfGoesLast = false, setupWolfGoesLast = false;  /* tee order */
 let tournament = defaultTournament();
 
 function setVH(){ document.documentElement.style.setProperty('--vh', `${window.innerHeight*0.01}px`); }
@@ -512,6 +523,12 @@ function setMaxHoles(n){
   document.getElementById('btn9h').classList.toggle('active', n===9);
 }
 
+function setWolfOrder(goesLast){
+  setupWolfGoesLast=goesLast;
+  document.getElementById('btn-wolf-first').classList.toggle('active',!goesLast);
+  document.getElementById('btn-wolf-last').classList.toggle('active',goesLast);
+  renderRulesBox();
+}
 function setSettlementType(type){ setupSettlementType=type; settlementType=type; }
 
 function setBetting(val){
@@ -542,26 +559,26 @@ function setPlayerCount(n){
 }
 function changeMaxRounds(delta){ setupMaxRounds=Math.max(1,Math.min(20,setupMaxRounds+delta)); document.getElementById('maxRoundsDisplay').textContent=setupMaxRounds; }
 
-function buildRulesHTML(n, forMoney, betAmt, carryOn){
+function buildRulesHTML(n, forMoney, betAmt, carryOn, goesLast){
   if(forMoney){
     const tieText=carryOn?`carry +${fmtMoney(betAmt*n)}`:'$0';
     return `<div class="rules-title">Money rules — ${n} players</div>
       <div class="rules-row"><span>Blind Wolf wins</span><span>${n===4?'+5x':'+4x'} stake from each</span></div>
-      <div class="rules-row"><span>Lone Wolf wins</span><span>${n===4?'+4x':'+3x'} stake from each</span></div>
-      <div class="rules-row"><span>Wolf wins</span><span>${n===4?'+3x':'+2x'} stake from each</span></div>
+      ${goesLast?'':` <div class="rules-row"><span>Lone Wolf wins</span><span>${n===4?'+4x':'+3x'} stake from each</span></div>`}
+      <div class="rules-row"><span>${goesLast?'Solo Wolf wins':'Wolf wins'}</span><span>${n===4?'+3x':'+2x'} stake from each</span></div>
       <div class="rules-row"><span>Solo Wolf loses</span><span>-1x stake to each</span></div>
       <div class="rules-row"><span>${n===3?'Lone player wins vs pair':'Winning side in partner play'}</span><span>${n===3?'+2x / -2x':'±1x each'}</span></div>
       <div class="rules-row"><span>Tied hole</span><span>${tieText}</span></div>`;
   }
-  return `<div class="rules-title">Scoring — ${n} players</div>
+  return `<div class="rules-title">Scoring — ${n} players · Wolf ${goesLast?'last':'first'}</div>
     <div class="rules-row"><span>Blind Wolf wins (solo)</span><span>+${n===4?5:4}p</span></div>
-    <div class="rules-row"><span>Lone Wolf wins (solo)</span><span>+${n===4?4:3}p</span></div>
-    <div class="rules-row"><span>Wolf wins (solo)</span><span>+${n===4?3:2}p</span></div>
+    ${goesLast?'':` <div class="rules-row"><span>Lone Wolf wins (solo)</span><span>+${n===4?4:3}p</span></div>`}
+    <div class="rules-row"><span>${goesLast?'Solo Wolf wins':'Wolf wins'} (solo)</span><span>+${n===4?3:2}p</span></div>
     <div class="rules-row"><span>Opponents beat solo Wolf</span><span>+1p each</span></div>
     <div class="rules-row"><span>${n===4?'2v2 winning side':'Partner side wins'}</span><span>+1p each</span></div>
     <div class="rules-row"><span>Tied hole</span><span>0p</span></div>`;
 }
-function renderRulesBox(){ const b=document.getElementById('rules-box'); if(b) b.innerHTML=buildRulesHTML(setupNumPlayers,setupPlayForMoney,setupBetPerPoint,setupCarryPot); }
+function renderRulesBox(){ const b=document.getElementById('rules-box'); if(b) b.innerHTML=buildRulesHTML(setupNumPlayers,setupPlayForMoney,setupBetPerPoint,setupCarryPot,setupWolfGoesLast); }
 
 function renderRulesScreen(){
   const n=setupNumPlayers||tournament.numPlayers||3;
@@ -606,12 +623,13 @@ function renderRulesScreen(){
 
 function showToast(msg,duration=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),duration); }
 
-function defaultTournament(){ return {players:[],numPlayers:3,maxRounds:1,maxHoles:18,rounds:[],currentGame:null,playForMoney:false,betPerPoint:1,settlementType:'winner',setupCarryPot:false}; }
+function defaultTournament(){ return {players:[],numPlayers:3,maxRounds:1,maxHoles:18,wolfGoesLast:false,rounds:[],currentGame:null,playForMoney:false,betPerPoint:1,settlementType:'winner',setupCarryPot:false}; }
 
 function saveTournament(){
   tournament.playForMoney=playForMoney; tournament.betPerPoint=betPerPoint;
   tournament.settlementType=settlementType; tournament.setupCarryPot=setupCarryPot;
   tournament.maxHoles=maxHoles;
+  tournament.wolfGoesLast=wolfGoesLast;
   tournament.currentGame=isGameInProgress()?snapshotCurrentGame():null;
   localStorage.setItem(STORAGE_KEY,JSON.stringify(tournament));
   updateResetButton();
@@ -626,6 +644,7 @@ function loadTournament(){
   if(!tournament.numPlayers) tournament.numPlayers=3;
   if(!tournament.maxRounds) tournament.maxRounds=1;
   if(!tournament.maxHoles) tournament.maxHoles=18;
+  if(!('wolfGoesLast' in tournament)) tournament.wolfGoesLast=false;
   if(!('currentGame' in tournament)) tournament.currentGame=null;
   if(!('playForMoney' in tournament)) tournament.playForMoney=false;
   if(!('betPerPoint' in tournament)) tournament.betPerPoint=1;
@@ -639,7 +658,7 @@ function isGameInProgress(){ return players.length>=3 && hole<=maxHoles; }
 function snapshotCurrentGame(){
   return { players:[...players],numPlayers,scores:[...scores],moneyBalances:[...moneyBalances],hole,
     history:JSON.parse(JSON.stringify(history)),showHist,hChoice,hResult,
-    currentRound,roundName,maxRounds,maxHoles,playForMoney,betPerPoint,settlementType,setupCarryPot,carryPot };
+    currentRound,roundName,maxRounds,maxHoles,wolfGoesLast,playForMoney,betPerPoint,settlementType,setupCarryPot,carryPot };
 }
 
 function restoreCurrentGame(g){
@@ -650,6 +669,7 @@ function restoreCurrentGame(g){
   currentRound=g.currentRound||1; roundName=g.roundName||`Round ${currentRound}`;
   maxRounds=g.maxRounds||tournament.maxRounds||1;
   maxHoles=g.maxHoles||tournament.maxHoles||18;
+  wolfGoesLast=g.wolfGoesLast||false;
   playForMoney=g.playForMoney||false; betPerPoint=g.betPerPoint||1;
   settlementType=g.settlementType||'winner'; setupCarryPot=g.setupCarryPot||false; carryPot=g.carryPot||0;
   document.getElementById('hist-area').style.display=history.length?'block':'none';
@@ -669,9 +689,9 @@ function updateResetButton(){
     const np=tournament.numPlayers||3, mr=tournament.maxRounds||1;
     const completed=tournament.rounds?tournament.rounds.length:0;
     document.getElementById('active-players-display').textContent=tournament.players.join(' · ')||'';
-    document.getElementById('active-rounds-display').textContent=`${completed} of ${mr} rounds · ${np} players · ${tournament.maxHoles||18} holes`;
+    document.getElementById('active-rounds-display').textContent=`${completed} of ${mr} rounds · ${np} players · ${tournament.maxHoles||18} holes · Wolf ${tournament.wolfGoesLast?'last':'first'}`;
     const rb=document.getElementById('rules-box-active');
-    if(rb) rb.innerHTML=buildRulesHTML(np,tournament.playForMoney||false,tournament.betPerPoint||1,tournament.setupCarryPot||false);
+    if(rb) rb.innerHTML=buildRulesHTML(np,tournament.playForMoney||false,tournament.betPerPoint||1,tournament.setupCarryPot||false,tournament.wolfGoesLast||false);
   } else { activeDiv.style.display='none'; }
 }
 
@@ -728,7 +748,7 @@ function startGame(){
   savePlayersToHistory(inputNames);
 
   players=inputNames; numPlayers=setupNumPlayers; maxRounds=setupMaxRounds;
-  maxHoles=setupMaxHoles;
+  maxHoles=setupMaxHoles; wolfGoesLast=setupWolfGoesLast;
   playForMoney=setupPlayForMoney; carryPot=0; betPerPoint=setupBetPerPoint;
   settlementType=setupSettlementType;
   scores=new Array(numPlayers).fill(0); moneyBalances=new Array(numPlayers).fill(0);
@@ -740,7 +760,7 @@ function startGame(){
   tournament.setupCarryPot=setupCarryPot;
   saveTournament();
   showScreen('game');
-  ga('start_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney,bet_per_point:betPerPoint,carry_pot:setupCarryPot});
+  ga('start_round',{round_number:currentRound,num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney,bet_per_point:betPerPoint,carry_pot:setupCarryPot,wolf_goes_last:wolfGoesLast});
   render();
 }
 
@@ -760,7 +780,7 @@ function quickRematch(){
   tournament.playForMoney=playForMoney; tournament.betPerPoint=betPerPoint;
   tournament.setupCarryPot=setupCarryPot; tournament.settlementType=settlementType;
   saveTournament();
-  ga('quick_rematch',{num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney});
+  ga('quick_rematch',{num_players:numPlayers,max_holes:maxHoles,play_for_money:playForMoney,wolf_goes_last:wolfGoesLast});
   showScreen('game');
   render();
   showToast('New game — same crew! 🐺');
@@ -778,8 +798,8 @@ function showScreen(id){
 function render(){
   const modeEl=document.getElementById('game-mode');
   if(modeEl){
-    if(playForMoney){ const ct=setupCarryPot?` · Carry pot ${fmtMoney(carryPot)}`:''; modeEl.innerHTML=`💰 Money · $${betPerPoint}/pt${ct}`; }
-    else modeEl.innerHTML=`🎯 Points · ${maxHoles} holes`;
+    if(playForMoney){ const ct=setupCarryPot?` · Carry pot ${fmtMoney(carryPot)}`:''; modeEl.innerHTML=`💰 Money · $${betPerPoint}/pt · Wolf ${wolfGoesLast?'last':'first'}${ct}`; }
+    else modeEl.innerHTML=`🎯 Points · ${maxHoles} holes · Wolf ${wolfGoesLast?'last':'first'}`;
   }
   renderScores(); renderChoices();
 }
@@ -808,13 +828,19 @@ function renderChoices(){
       return `<div class="choice-item c-green" onclick="pick('partner:${i}')"><div><div class="ci-title">Partner with ${players[i]}</div><div class="ci-sub">${vsLabel}</div></div><div class="ci-pts green">+1p each</div></div>`;
     }).join('');
     const spec=numPlayers===4&&hole>=maxHoles-1, note=spec?' 🏴 (fewest pts — has Honor)':'';
-    area.innerHTML=`<div class="choice-label">${roundName} · Wolf: ${cn()}${note} — choose hole type</div>
-    <div class="choices">
-      <div class="choice-item c-gold" onclick="pick('blind')"><div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} is Wolf — declared before tee shot</div></div><div class="ci-pts gold">${numPlayers===4?5:4}p</div></div>
-      <div class="choice-item c-gold" onclick="pick('lone')"><div><div class="ci-title">Lone Wolf</div><div class="ci-sub">${cn()} is Wolf — after own tee shot</div></div><div class="ci-pts gold">${numPlayers===4?4:3}p</div></div>
-      <div class="choice-item c-red" onclick="pick('wolf')"><div><div class="ci-title">Wolf</div><div class="ci-sub">${cn()} is Wolf — after all tee shots</div></div><div class="ci-pts gold">${numPlayers===4?3:2}p</div></div>
+    const blindPts=numPlayers===4?5:4, lonePts=numPlayers===4?4:3, wolfPts=numPlayers===4?3:2;
+    const choiceItems = wolfGoesLast ? `
+      <div class="choice-item c-gold" onclick="pick('blind')"><div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} goes solo — declared before anyone tees off</div></div><div class="ci-pts gold">${blindPts}p</div></div>
+      <div class="choice-item c-red" onclick="pick('wolf')"><div><div class="ci-title">Solo Wolf</div><div class="ci-sub">${cn()} goes solo — after seeing all tee shots</div></div><div class="ci-pts gold">${wolfPts}p</div></div>
       ${partnerChoices}
-    </div>`; return;
+    ` : `
+      <div class="choice-item c-gold" onclick="pick('blind')"><div><div class="ci-title">Blind Wolf</div><div class="ci-sub">${cn()} is Wolf — declared before tee shot</div></div><div class="ci-pts gold">${blindPts}p</div></div>
+      <div class="choice-item c-gold" onclick="pick('lone')"><div><div class="ci-title">Lone Wolf</div><div class="ci-sub">${cn()} is Wolf — after own tee shot</div></div><div class="ci-pts gold">${lonePts}p</div></div>
+      <div class="choice-item c-red" onclick="pick('wolf')"><div><div class="ci-title">Wolf</div><div class="ci-sub">${cn()} is Wolf — after all tee shots</div></div><div class="ci-pts gold">${wolfPts}p</div></div>
+      ${partnerChoices}
+    `;
+    area.innerHTML=`<div class="choice-label">${roundName} · Wolf: ${cn()}${note} — choose hole type</div>
+    <div class="choices">${choiceItems}</div>`; return;
   }
   const info=holeInfo();
   const wl=info.isSolo?info.wolfName:info.wolfSideNames, ol=info.isSolo?info.vsNames:info.vsSideNames;
@@ -1031,6 +1057,7 @@ function prepareNextRound(){
   players=[...names].slice(0,np); numPlayers=np; maxRounds=mr; maxHoles=tournament.maxHoles||18;
   playForMoney=tournament.playForMoney||false; betPerPoint=tournament.betPerPoint||1;
   settlementType=tournament.settlementType||'winner'; setupCarryPot=tournament.setupCarryPot||false;
+  wolfGoesLast=tournament.wolfGoesLast||false;
   scores=new Array(np).fill(0); moneyBalances=new Array(np).fill(0); carryPot=0;
   hole=1; history=[]; showHist=false; hChoice=null; hResult=null;
   currentRound=tournament.rounds.length+1; roundName=`Round ${currentRound}`;
@@ -1051,12 +1078,12 @@ function resetTournament(){
   localStorage.removeItem(STORAGE_KEY); tournament=defaultTournament();
   players=[]; scores=[]; moneyBalances=[]; hole=1; history=[]; showHist=false;
   hChoice=null; hResult=null; currentRound=1; roundName='Round 1';
-  numPlayers=3; maxRounds=1; maxHoles=18; setupNumPlayers=3; setupMaxRounds=1; setupMaxHoles=18;
+  numPlayers=3; maxRounds=1; maxHoles=18; wolfGoesLast=false; setupNumPlayers=3; setupMaxRounds=1; setupMaxHoles=18; setupWolfGoesLast=false;
   playForMoney=false; betPerPoint=1; settlementType='winner'; carryPot=0;
   setupPlayForMoney=false; setupBetPerPoint=1; setupSettlementType='winner'; setupCarryPot=false;
   document.getElementById('setup-active').style.display='none';
   document.getElementById('setup-new').style.display='flex';
-  setPlayerCount(3); setMaxHoles(18);
+  setPlayerCount(3); setMaxHoles(18); setWolfOrder(false);
   document.getElementById('maxRoundsDisplay').textContent=1;
   setBetting(false); setSettlementType('winner'); setBetAmount(1); setCarryPot(false);
   ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
@@ -1180,8 +1207,9 @@ window.onload=function(){
     settlementType=tournament.settlementType||'winner'; setupPlayForMoney=playForMoney;
     setupBetPerPoint=betPerPoint; setupSettlementType=settlementType;
     setupCarryPot=tournament.setupCarryPot||false; setupMaxHoles=tournament.maxHoles||18;
+    setupWolfGoesLast=tournament.wolfGoesLast||false;
     setBetting(setupPlayForMoney); setSettlementType(setupSettlementType);
-    setCarryPot(setupCarryPot); setBetAmount(setupBetPerPoint); setMaxHoles(setupMaxHoles);
+    setCarryPot(setupCarryPot); setBetAmount(setupBetPerPoint); setMaxHoles(setupMaxHoles); setWolfOrder(setupWolfGoesLast);
 
     if(tournament.currentGame){ restoreCurrentGame(tournament.currentGame); showScreen('game'); render(); return; }
 
@@ -1198,7 +1226,7 @@ window.onload=function(){
       setupNumPlayers=3; setupMaxRounds=1; setupMaxHoles=18;
       playForMoney=false; betPerPoint=1; settlementType='winner';
       setupPlayForMoney=false; setupBetPerPoint=1; setupSettlementType='winner'; setupCarryPot=false;
-      setPlayerCount(3); setMaxHoles(18); document.getElementById('maxRoundsDisplay').textContent=1;
+      setPlayerCount(3); setMaxHoles(18); setWolfOrder(false); document.getElementById('maxRoundsDisplay').textContent=1;
       setBetting(false); setBetAmount(1); setCarryPot(false); updateResetButton(); renderSavedPlayerChips(); showScreen('setup');
       showToast('Saved game was reset after an error');
     }catch(e){ console.error('Wolf fallback failed:',e); alert('Wolf failed to start. Clear browser data for this site and reload.'); }
